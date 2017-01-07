@@ -142,7 +142,6 @@ public class Player : Photon.MonoBehaviour {
 			stream.SendNext(isMoving);
 			stream.SendNext(jump);
 			stream.SendNext(facingRight);
-			stream.SendNext(horizontal);
 		}
 		else
 		{
@@ -150,7 +149,6 @@ public class Player : Photon.MonoBehaviour {
 			anim.SetBool("isMoving", (bool)stream.ReceiveNext());
 			anim.SetBool("jump", (bool)stream.ReceiveNext());
 			facingRight = (bool)stream.ReceiveNext();
-			horizontal = (float)stream.ReceiveNext();
 		}
 	}
 }
