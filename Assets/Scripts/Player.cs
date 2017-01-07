@@ -33,7 +33,6 @@ public class Player : Photon.MonoBehaviour {
 
 	private bool isMoving = false;
 
-	float horizontal = 0;
 
 	Vector3 realPosition;
 
@@ -46,25 +45,22 @@ public class Player : Photon.MonoBehaviour {
 		if (!photonView.isMine) transform.GetChild(1).gameObject.SetActive(false);
 	}
 
-	void FixedUpdate()
+	void FixedUpdate ()
 	{
-		bool tempDir = facingRight;
-
-		if (photonView.isMine)
-		{
+		if (photonView.isMine) {
 			// updates the grounded value
 			grounded = isGrounded ();
 
 			// Handles the jump 
-			if (Input.GetKey (KeyCode.Space) && grounded && !jump && anim.GetCurrentAnimatorStateInfo(0).IsTag("free")) {
+			if (Input.GetKey (KeyCode.Space) && grounded && !jump && anim.GetCurrentAnimatorStateInfo (0).IsTag ("free")) {
 				rb2d.AddForce (Vector2.up * jumpForce);
 				jump = true;
 				anim.SetBool ("jump", true);
 			}
 
 			// Handles the movement for left and right
-			horizontal = Input.GetAxis ("Horizontal");
-			transform.position += new Vector3(horizontal * movementSpeed * Time.deltaTime, 0, 0);
+			float horizontal = Input.GetAxis ("Horizontal");
+			transform.position += new Vector3 (horizontal * movementSpeed * Time.deltaTime, 0, 0);
 
 			anim.SetBool ("attack", false);
 
@@ -90,7 +86,7 @@ public class Player : Photon.MonoBehaviour {
 				}
 			}
 
-			if (horizontal != 0 && !jump && anim.GetCurrentAnimatorStateInfo(0).IsTag("free")) {
+			if (horizontal != 0 && !jump && anim.GetCurrentAnimatorStateInfo (0).IsTag ("free")) {
 				isMoving = true;
 			} else {
 				isMoving = false;
@@ -99,27 +95,25 @@ public class Player : Photon.MonoBehaviour {
 			anim.SetBool ("isMoving", isMoving);
 
 			// Reset attacked
-			if(anim.GetCurrentAnimatorStateInfo(0).IsName("player_Idle")) {
+			if (anim.GetCurrentAnimatorStateInfo (0).IsName ("player_Idle")) {
 				anim.SetBool ("attacked", false);
 				anim.SetBool ("falling", false);
 			}
 
-			if ((horizontal > 0 && !facingRight) || (horizontal < 0 && facingRight)) facingRight = !facingRight;
+			// Sprite flipping
+			if ((horizontal > 0 && !facingRight) || (horizontal < 0 && facingRight)) 
+			{
+				Vector3 scale = transform.localScale;
+				scale.x *= -1;
 
+				transform.localScale = scale;
+				facingRight = !facingRight;
+			}
 		}
 		else
 		{
 			transform.position = Vector3.Lerp(transform.position, realPosition, 0.1f);
 		}
-		// Sprite flipping
-		if (tempDir != facingRight)
-		{
-			Vector3 scale = transform.localScale;
-			scale.x *= -1;
-
-			transform.localScale = scale;
-		}
-			
 	}
 
 	bool isGrounded()
@@ -159,16 +153,16 @@ public class Player : Photon.MonoBehaviour {
 		if (stream.isWriting)
 		{
 			stream.SendNext(transform.position);
+			stream.SendNext(transform.localScale);
 			stream.SendNext(isMoving);
 			stream.SendNext(jump);
-			stream.SendNext(facingRight);
 		}
 		else
 		{
 			realPosition = (Vector3)stream.ReceiveNext();
+			transform.localScale = (Vector3)stream.ReceiveNext();
 			anim.SetBool("isMoving", (bool)stream.ReceiveNext());
 			anim.SetBool("jump", (bool)stream.ReceiveNext());
-			facingRight = (bool)stream.ReceiveNext();
 		}
 	}
 }
