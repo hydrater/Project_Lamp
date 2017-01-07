@@ -46,6 +46,7 @@ public class Player : Photon.MonoBehaviour {
 
 	void FixedUpdate()
 	{
+		float horizontal = 0;
 		if (photonView.isMine)
 		{
 			// updates the grounded value
@@ -59,7 +60,7 @@ public class Player : Photon.MonoBehaviour {
 			}
 
 			// Handles the movement for left and right
-			float horizontal = Input.GetAxis ("Horizontal");
+			horizontal = Input.GetAxis ("Horizontal");
 			transform.position += new Vector3(horizontal * movementSpeed * Time.deltaTime, 0, 0);
 
 			// We do not want the player head to collide with the platform above
@@ -72,15 +73,6 @@ public class Player : Photon.MonoBehaviour {
 					anim.SetBool ("falling", true);
 					Debug.Log ("A");
 				}
-			}
-
-			anim.SetFloat ("horizontal", horizontal);
-
-			// Sprite flipping
-			if (horizontal > 0 && !facingRight) {
-				Flip ();
-			} else if (horizontal < 0 && facingRight) {
-				Flip ();
 			}
 
 			if (horizontal != 0 || jump) {
@@ -102,6 +94,8 @@ public class Player : Photon.MonoBehaviour {
 			transform.position = Vector3.Lerp(transform.position, realPosition, 0.1f);
 		}
 
+		// Sprite flipping
+		if ((horizontal > 0 && !facingRight) || (horizontal < 0 && facingRight)) Flip ();
 	}
 
 	bool isGrounded()
@@ -145,10 +139,16 @@ public class Player : Photon.MonoBehaviour {
 		if (stream.isWriting)
 		{
 			stream.SendNext(transform.position);
+			stream.SendNext(isMoving);
+			stream.SendNext(jump);
+			stream.SendNext(facingRight);
 		}
 		else
 		{
 			realPosition = (Vector3)stream.ReceiveNext();
+			anim.SetBool("isMoving", (bool)stream.ReceiveNext());
+			anim.SetBool("jump", (bool)stream.ReceiveNext());
+			facingRight = (bool)stream.ReceiveNext();
 		}
 	}
 }
