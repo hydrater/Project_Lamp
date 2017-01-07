@@ -33,6 +33,8 @@ public class Player : Photon.MonoBehaviour {
 
 	private bool isMoving = false;
 
+	float horizontal = 0;
+
 	Vector3 realPosition;
 
 	// Use this for initialization
@@ -46,7 +48,6 @@ public class Player : Photon.MonoBehaviour {
 
 	void FixedUpdate()
 	{
-		float horizontal = 0;
 		if (photonView.isMine)
 		{
 			// updates the grounded value
@@ -93,7 +94,10 @@ public class Player : Photon.MonoBehaviour {
 		{
 			transform.position = Vector3.Lerp(transform.position, realPosition, 0.1f);
 		}
+	}
 
+	void lateUpdate()
+	{
 		// Sprite flipping
 		if ((horizontal > 0 && !facingRight) || (horizontal < 0 && facingRight)) Flip ();
 	}
@@ -142,6 +146,7 @@ public class Player : Photon.MonoBehaviour {
 			stream.SendNext(isMoving);
 			stream.SendNext(jump);
 			stream.SendNext(facingRight);
+			stream.SendNext(horizontal);
 		}
 		else
 		{
@@ -149,6 +154,7 @@ public class Player : Photon.MonoBehaviour {
 			anim.SetBool("isMoving", (bool)stream.ReceiveNext());
 			anim.SetBool("jump", (bool)stream.ReceiveNext());
 			facingRight = (bool)stream.ReceiveNext();
+			horizontal = (float)stream.ReceiveNext();
 		}
 	}
 }
