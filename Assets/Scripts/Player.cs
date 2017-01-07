@@ -48,6 +48,8 @@ public class Player : Photon.MonoBehaviour {
 
 	void FixedUpdate()
 	{
+		bool tempDir = facingRight;
+
 		if (photonView.isMine)
 		{
 			// updates the grounded value
@@ -88,13 +90,23 @@ public class Player : Photon.MonoBehaviour {
 				anim.SetBool ("attacked", false);
 				anim.SetBool ("falling", false);
 			}
+
+			if ((horizontal > 0 && !facingRight) || (horizontal < 0 && facingRight)) facingRight = !facingRight;
+
 		}
 		else
 		{
 			transform.position = Vector3.Lerp(transform.position, realPosition, 0.1f);
 		}
 		// Sprite flipping
-		if ((horizontal > 0 && !facingRight) || (horizontal < 0 && facingRight)) Flip (photonView.ownerId);
+		if (tempDir != facingRight)
+		{
+			Vector3 scale = transform.localScale;
+			scale.x *= -1;
+
+			transform.localScale = scale;
+		}
+			
 	}
 
 	bool isGrounded()
@@ -108,19 +120,6 @@ public class Player : Photon.MonoBehaviour {
 			return true;
 		}
 		return false;
-	}
-
-	// Flip the player sprite
-	[PunRPC]
-	void Flip(int id)
-	{
-		if (photonView.ownerId != id) return;
-		facingRight = !facingRight;
-
-		Vector3 scale = transform.localScale;
-		scale.x *= -1;
-
-		transform.localScale = scale;
 	}
 
 	void OnCollisionEnter2D(Collision2D other)
