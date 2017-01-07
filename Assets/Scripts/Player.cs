@@ -72,11 +72,10 @@ public class Player : Photon.MonoBehaviour {
 				} else {
 					//bc2d.enabled = true;
 					anim.SetBool ("falling", true);
-					Debug.Log ("A");
 				}
 			}
 
-			if (horizontal != 0 || jump) {
+			if (horizontal != 0 && !jump && anim.GetCurrentAnimatorStateInfo(0).IsTag("free")) {
 				isMoving = true;
 			} else {
 				isMoving = false;
