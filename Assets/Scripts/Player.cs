@@ -66,6 +66,19 @@ public class Player : Photon.MonoBehaviour {
 			horizontal = Input.GetAxis ("Horizontal");
 			transform.position += new Vector3(horizontal * movementSpeed * Time.deltaTime, 0, 0);
 
+			anim.SetBool ("attack", false);
+
+			// Handles the attack
+			if (Input.GetMouseButton (0)) {
+				anim.SetBool ("attack", true);
+			}
+
+			if (anim.GetCurrentAnimatorStateInfo (0).IsTag ("Attack")) {
+				attack = true;
+			} else {
+				attack = false;
+			}
+
 			// We do not want the player head to collide with the platform above
 			if (jump) {
 				if (rb2d.velocity.y > 0) {
@@ -125,12 +138,19 @@ public class Player : Photon.MonoBehaviour {
 	void OnCollisionEnter2D(Collision2D other)
 	{
 		// If the player collided with another object and is attacking, knock the other player back
-		if (anim != null && attack && other.gameObject.tag == "Player") {
-			Debug.Log ("Attacking");
-			//anim.GetCurrentAnimatorStateInfo(0).IsTag("Attack")
+		if (attack && other.gameObject.tag == "Player") {
+			Debug.Log ("Attack");
+			//
 			Rigidbody2D otherRb2d = other.gameObject.GetComponent<Rigidbody2D> ();
 			Vector2 direction = (other.transform.position - transform.position).normalized;
 			otherRb2d.AddForce (direction * attackForce);
+		} 
+	}
+
+	void OnTriggerEnter2D(Collider2D other)
+	{
+		if (other.gameObject.tag == "Water") {
+			Debug.Log ("DEATH");
 		}
 	}
 
