@@ -52,11 +52,14 @@ public class Player : Photon.MonoBehaviour {
 
 	SPECTATORMODE spectatorMode = SPECTATORMODE.TARGET;
 
-	// Use this for initialization
-	void Start () {
+	void Awake() {
 		rb2d = GetComponent<Rigidbody2D> ();
 		bc2d = GetComponent<BoxCollider2D> ();
 		anim = GetComponent<Animator> ();
+	}
+
+	// Use this for initialization
+	void Start () {
 		realPosition = transform.position;
 		if (!photonView.isMine) transform.GetChild(1).gameObject.SetActive(false);
 	}
@@ -69,6 +72,7 @@ public class Player : Photon.MonoBehaviour {
 			anim.SetBool ("attack", false);
 			attack = false;
 
+			Debug.Log ("A");
 
 			anim.SetBool ("attacked", false);
 			attacked = false;
@@ -243,6 +247,7 @@ public class Player : Photon.MonoBehaviour {
 			stream.SendNext(anim.GetBool ("isMoving"));
 			stream.SendNext(anim.GetBool("jump"));
 			stream.SendNext(attack);
+			stream.SendNext (attacked);
 		}
 		else
 		{
@@ -251,6 +256,7 @@ public class Player : Photon.MonoBehaviour {
  			anim.SetBool("isMoving", (bool)stream.ReceiveNext());
 			anim.SetBool("jump", (bool)stream.ReceiveNext());
 			anim.SetBool("attack", (bool)stream.ReceiveNext());
+			anim.SetBool ("attacked", (bool)stream.ReceiveNext ());
 		}
 	}
 }
