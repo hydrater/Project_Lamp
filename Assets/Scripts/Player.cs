@@ -48,6 +48,8 @@ public class Player : Photon.MonoBehaviour {
 
 	Vector3 realPosition;
 
+	public AudioClip[] splashes;
+
 	SPECTATORMODE spectatorMode = SPECTATORMODE.TARGET;
 
 	void Awake() {
@@ -161,6 +163,9 @@ public class Player : Photon.MonoBehaviour {
 			transform.position = Vector3.Lerp(transform.position, realPosition, 0.1f);
 			anim.SetBool ("attack", attack);
 			anim.SetBool ("attacked", attacked);
+			if(dead)
+				if (GetComponent<SpriteRenderer>().enabled)
+					RIP();
 		}
 
 		if (attack)
@@ -189,15 +194,24 @@ public class Player : Photon.MonoBehaviour {
 		return false;
 	}
 
+	void RIP()
+	{
+		Debug.Log ("DEATH");
+		dead = true;
+		deadPos = transform.position;
+		rb2d.isKinematic = true;
+		bc2d.enabled = false;
+		GetComponent<SpriteRenderer>().enabled = false;
+		AudioSource audioS = GetComponent<AudioSource>();
+		audioS.clip = splashes[Random.Range(0,3)];
+		audioS.Play();
+	}
+
 	void OnTriggerEnter2D(Collider2D other)
 	{
-		if (other.gameObject.tag == "Water") {
-			Debug.Log ("DEATH");
-			dead = true;
-			deadPos = transform.position;
-			rb2d.isKinematic = true;
-			bc2d.enabled = false;
-			GetComponent<SpriteRenderer> ().enabled = false;
+		if (other.gameObject.tag == "Water") 
+		{
+			RIP();
 		}
 
 		// If the player collided with another player which is attacking, knock the player back
