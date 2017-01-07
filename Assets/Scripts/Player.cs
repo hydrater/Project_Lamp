@@ -63,11 +63,13 @@ public class Player : Photon.MonoBehaviour {
 
 	void FixedUpdate ()
 	{
-		// Reset attack
-		anim.SetBool ("attack", false);
-
 		// Reset attacked
 		if (anim.GetCurrentAnimatorStateInfo (0).IsName ("player_Idle")) {
+			// Reset attack
+			anim.SetBool ("attack", false);
+			attack = false;
+
+
 			anim.SetBool ("attacked", false);
 			attacked = false;
 			anim.SetBool ("falling", false);
@@ -100,7 +102,10 @@ public class Player : Photon.MonoBehaviour {
 
 			// Handles the attack
 			if (Input.GetMouseButton (0) || Input.GetKey(KeyCode.C)) {
-				anim.SetBool ("attack", true);
+				if (!attack) {
+					anim.SetBool ("attack", true);
+					attack = true;
+				}
 			}
 
 			if (anim.GetCurrentAnimatorStateInfo (0).IsTag ("Attack")) {
