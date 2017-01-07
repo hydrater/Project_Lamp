@@ -32,7 +32,9 @@ public class Player : Photon.MonoBehaviour {
 
 	private bool facingRight = true;
 
-	private bool attack = true;
+	private bool attack = false;
+
+	private bool attacked = false;
 
 	[SerializeField]
 	private float attackForce = 1;
@@ -121,6 +123,7 @@ public class Player : Photon.MonoBehaviour {
 			// Reset attacked
 			if (anim.GetCurrentAnimatorStateInfo (0).IsName ("player_Idle")) {
 				anim.SetBool ("attacked", false);
+				attacked = false;
 				anim.SetBool ("falling", false);
 			}
 
@@ -158,10 +161,15 @@ public class Player : Photon.MonoBehaviour {
 		// If the player collided with another object and is attacking, knock the other player back
 		if (attack && other.gameObject.tag == "Player") {
 			Debug.Log ("Attack");
-			Rigidbody2D otherRb2d = other.gameObject.GetComponent<Rigidbody2D> ();
-			Vector2 direction = (other.transform.position - transform.position).normalized;
-			otherRb2d.AddForce (direction * attackForce);
-			other.gameObject.GetComponent<Player> ().Attacked ();
+			//Rigidbody2D otherRb2d = other.gameObject.GetComponent<Rigidbody2D> ();
+			//Vector2 direction = (other.transform.position - transform.position).normalized;
+			//otherRb2d.AddForce (direction * attackForce);
+			//other.gameObject.GetComponent<Player> ().Attacked ();
+			if (other.gameObject.GetComponent<Player> ().attack) {
+				Vector2 direction = (transform.position - other.gameObject.transform.position).normalized;
+				rb2d.AddForce (direction * attackForce);
+				Attacked ();
+			}
 		} 
 	}
 
@@ -219,6 +227,7 @@ public class Player : Photon.MonoBehaviour {
 	public void Attacked()
 	{
 		anim.SetBool ("attacked", true);
+		attacked = true;
 	}
 
 	public void OnPhotonSerializeView (PhotonStream stream, PhotonMessageInfo info)
