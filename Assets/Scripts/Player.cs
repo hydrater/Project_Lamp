@@ -59,7 +59,7 @@ public class Player : Photon.MonoBehaviour {
 		bc2d = GetComponent<BoxCollider2D> ();
 		anim = GetComponent<Animator> ();
 		if (!photonView.isMine)
-			Destroy (rigidbody2D);
+			Destroy (GetComponent<Rigidbody2D>());
 	}
 
 	// Use this for initialization
