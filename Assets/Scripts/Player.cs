@@ -36,7 +36,7 @@ public class Player : Photon.MonoBehaviour {
 	private bool attacked = false;
 
 	[SerializeField]
-	private float attackForce = 1;
+	private float attackForce = 100;
 
 	private bool dead = false;
 
@@ -49,8 +49,6 @@ public class Player : Photon.MonoBehaviour {
 	Vector3 realPosition;
 
 	SPECTATORMODE spectatorMode = SPECTATORMODE.TARGET;
-
-	private GameObject collidedPlayer = null;
 
 	void Awake() {
 		rb2d = GetComponent<Rigidbody2D> ();
@@ -68,21 +66,27 @@ public class Player : Photon.MonoBehaviour {
 
 	void FixedUpdate ()
 	{
-		// Reset attacked
-		if (anim.GetCurrentAnimatorStateInfo (0).IsName ("player_Idle")) {
-			// Reset attack
-			anim.SetBool ("attack", false);
-			attack = false;
+		Debug.Log("attacked " + attacked);
+		Debug.Log("attack " + attack);
 
-			anim.SetBool ("attacked", false);
-			attacked = false;
-			anim.SetBool ("falling", false);
-		}
-
-		if (photonView.isMine) {
-			if (dead) {
+		if (photonView.isMine) 
+		{
+			if (dead) 
+			{
 				UpdateSpectatorMode ();
 				return;
+			}
+
+			// Reset attacked
+			if (anim.GetCurrentAnimatorStateInfo (0).IsName ("player_Idle")) 
+			{
+				// Reset attack
+				anim.SetBool ("attack", false);
+				attack = false;
+
+				anim.SetBool ("attacked", false);
+				attacked = false;
+				anim.SetBool ("falling", false);
 			}
 
 			// updates the grounded value
@@ -102,31 +106,28 @@ public class Player : Photon.MonoBehaviour {
 			float horizontal = Input.GetAxis ("Horizontal");
 			transform.position += new Vector3 (horizontal * movementSpeed * Time.deltaTime, 0, 0);
 
-
-
 			// Handles the attack
-			if (Input.GetMouseButton (0) || Input.GetKey(KeyCode.C)) {
-				if (!attack) {
+			if (Input.GetMouseButton (0) || Input.GetKey(KeyCode.C)) 
+			{
+				if (!attack) 
+				{
 					anim.SetBool ("attack", true);
 					attack = true;
 				}
 			}
 
-			if (anim.GetCurrentAnimatorStateInfo (0).IsTag ("Attack")) {
-				attack = true;
-			} else {
-				attack = false;
-			}
+			if (!anim.GetCurrentAnimatorStateInfo (0).IsTag ("Attack")) attack = false;
 
-			if (collidedPlayer != null) {
-				if (collidedPlayer.GetComponent<Player> ().attack) {
-					Debug.Log ("Attacked");
-					Vector2 direction = (transform.position - collidedPlayer.transform.position).normalized;
-					rb2d.AddForce (direction * attackForce);
-					anim.SetBool ("attacked", true);
-					attacked = true;
-				}
-			}
+//			if (collidedPlayer != null) {
+//				if (collidedPlayer.GetComponent<Player> ().attack) 
+//				{
+//					Debug.Log ("Attacked");
+//					Vector2 direction = (transform.position - collidedPlayer.transform.position).normalized;
+//					rb2d.AddForce (direction * attackForce);
+//					anim.SetBool ("attacked", true);
+//					attacked = true;
+//				}
+//			}
 
 			// We do not want the player head to collide with the platform above
 			if (anim.GetBool("jump")) {
@@ -158,8 +159,14 @@ public class Player : Photon.MonoBehaviour {
 		else
 		{
 			transform.position = Vector3.Lerp(transform.position, realPosition, 0.1f);
+			anim.SetBool ("attack", attack);
+			anim.SetBool ("attacked", attacked);
 		}
 
+		if (attack)
+			transform.GetChild(1).gameObject.SetActive(true);
+		else
+			transform.GetChild(1).gameObject.SetActive(false);
 	}
 
 	bool isGrounded()
@@ -182,25 +189,6 @@ public class Player : Photon.MonoBehaviour {
 		return false;
 	}
 
-	void OnCollisionEnter2D(Collision2D other)
-	{
-		// If the player collided with another object and is attacking, knock the other player back
-		if (other.gameObject.tag == "Player") {
-			//Rigidbody2D otherRb2d = other.gameObject.GetComponent<Rigidbody2D> ();
-			//Vector2 direction = (other.transform.position - transform.position).normalized;
-			//otherRb2d.AddForce (direction * attackForce);
-			//other.gameObject.GetComponent<Player> ().Attacked ();
-			collidedPlayer = other.gameObject;
-		} 
-	}
-
-	void OnCollisionExit2D(Collision2D other)
-	{
-		if (collidedPlayer == other.gameObject) {
-			collidedPlayer = null;
-		}
-	}
-
 	void OnTriggerEnter2D(Collider2D other)
 	{
 		if (other.gameObject.tag == "Water") {
@@ -210,6 +198,19 @@ public class Player : Photon.MonoBehaviour {
 			rb2d.isKinematic = true;
 			bc2d.enabled = false;
 			GetComponent<SpriteRenderer> ().enabled = false;
+		}
+
+		// If the player collided with another player which is attacking, knock the player back
+		if (photonView.isMine)
+		{
+			if (other.gameObject.tag == "Hit") 
+			{
+				attacked = true;
+				Vector2 direction = (transform.position - other.transform.parent.position).normalized;
+				rb2d.AddForce (direction * attackForce);
+				anim.SetBool ("attacked", true);
+				Debug.Log("Ouch!");
+			} 
 		}
 	}
 
@@ -269,8 +270,8 @@ public class Player : Photon.MonoBehaviour {
 			transform.localScale = (Vector3)stream.ReceiveNext();
  			anim.SetBool("isMoving", (bool)stream.ReceiveNext());
 			anim.SetBool("jump", (bool)stream.ReceiveNext());
-			anim.SetBool("attack", (bool)stream.ReceiveNext());
-			anim.SetBool ("attacked", (bool)stream.ReceiveNext ());
+			attack = (bool)stream.ReceiveNext();
+			attacked = (bool)stream.ReceiveNext ();
 		}
 	}
 }
