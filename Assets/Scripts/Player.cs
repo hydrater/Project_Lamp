@@ -3,6 +3,13 @@ using System.Collections;
 
 public class Player : Photon.MonoBehaviour {
 
+	public enum SPECTATORMODE
+	{
+		TARGET,
+		AUTO,
+		MANUAL,
+	}
+
 	[HideInInspector]
 	public Rigidbody2D rb2d;
 
@@ -33,8 +40,17 @@ public class Player : Photon.MonoBehaviour {
 
 	private bool isMoving = false;
 
+	private bool dead = false;
+
+	private Vector3 target = Vector3.zero;
+
+	private int targetNo = 0;
+
+	private Vector3 deadPos = Vector3.zero;
 
 	Vector3 realPosition;
+
+	SPECTATORMODE spectatorMode = SPECTATORMODE.TARGET;
 
 	// Use this for initialization
 	void Start () {
@@ -48,8 +64,17 @@ public class Player : Photon.MonoBehaviour {
 	void FixedUpdate ()
 	{
 		if (photonView.isMine) {
+			if (dead) {
+				UpdateSpectatorMode ();
+				return;
+			}
+
 			// updates the grounded value
 			grounded = isGrounded ();
+
+			if (anim.GetCurrentAnimatorStateInfo (0).IsName ("player_Dizzy")) {
+				return;
+			}
 
 			// Handles the jump 
 			if (Input.GetKey (KeyCode.Space) && grounded && !jump && anim.GetCurrentAnimatorStateInfo (0).IsTag ("free")) {
@@ -65,7 +90,7 @@ public class Player : Photon.MonoBehaviour {
 			anim.SetBool ("attack", false);
 
 			// Handles the attack
-			if (Input.GetMouseButton (0)) {
+			if (Input.GetMouseButton (0) || Input.GetKey(KeyCode.C)) {
 				anim.SetBool ("attack", true);
 			}
 
@@ -134,10 +159,10 @@ public class Player : Photon.MonoBehaviour {
 		// If the player collided with another object and is attacking, knock the other player back
 		if (attack && other.gameObject.tag == "Player") {
 			Debug.Log ("Attack");
-			//
 			Rigidbody2D otherRb2d = other.gameObject.GetComponent<Rigidbody2D> ();
 			Vector2 direction = (other.transform.position - transform.position).normalized;
 			otherRb2d.AddForce (direction * attackForce);
+			other.gameObject.GetComponent<Player> ().Attacked ();
 		} 
 	}
 
@@ -145,7 +170,56 @@ public class Player : Photon.MonoBehaviour {
 	{
 		if (other.gameObject.tag == "Water") {
 			Debug.Log ("DEATH");
+			dead = true;
+			deadPos = transform.position;
+			rb2d.isKinematic = true;
+			bc2d.enabled = false;
+			GetComponent<SpriteRenderer> ().enabled = false;
 		}
+	}
+
+	void UpdateSpectatorMode()
+	{
+		GameObject[] players = GameObject.FindGameObjectsWithTag ("Player");
+
+		if (Input.GetKeyDown(KeyCode.Tab)) {
+			++targetNo;
+
+			if (targetNo < players.Length) {
+				target = players [targetNo].transform.position;
+			} else { // wrap back to your dead position
+				target = deadPos;
+			}
+
+			spectatorMode = SPECTATORMODE.TARGET;
+		}
+
+		if (Input.GetKeyDown (KeyCode.D)) {
+			spectatorMode = SPECTATORMODE.AUTO;
+		}
+
+		if (Input.GetKey (KeyCode.LeftArrow) || Input.GetKey (KeyCode.RightArrow) ||
+			Input.GetKey (KeyCode.UpArrow) || Input.GetKey (KeyCode.DownArrow)) {
+			spectatorMode = SPECTATORMODE.MANUAL;
+
+			if (Input.GetKey (KeyCode.LeftArrow))
+				transform.position -= new Vector3(movementSpeed * Time.deltaTime, 0, 0);
+			if (Input.GetKey (KeyCode.RightArrow))
+				transform.position += new Vector3(movementSpeed * Time.deltaTime, 0, 0);
+			if(Input.GetKey(KeyCode.UpArrow))
+				transform.position += new Vector3(0, movementSpeed * Time.deltaTime, 0);
+			if (Input.GetKey (KeyCode.DownArrow))
+				transform.position -= new Vector3(0, movementSpeed * Time.deltaTime, 0);
+		}
+
+		if (spectatorMode != SPECTATORMODE.MANUAL) {
+			transform.position = target;
+		}
+	}
+
+	public void Attacked()
+	{
+		anim.SetBool ("attacked", true);
 	}
 
 	public void OnPhotonSerializeView (PhotonStream stream, PhotonMessageInfo info)
