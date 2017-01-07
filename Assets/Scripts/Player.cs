@@ -19,8 +19,6 @@ public class Player : Photon.MonoBehaviour {
 	[HideInInspector]
 	public Animator anim;
 
-	public Transform groundCheck;
-
 	[SerializeField]
 	private float jumpForce = 1;
 
@@ -65,7 +63,7 @@ public class Player : Photon.MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		realPosition = transform.position;
-		if (!photonView.isMine) transform.GetChild(1).gameObject.SetActive(false);
+		if (!photonView.isMine) transform.GetChild(0).gameObject.SetActive(false);
 	}
 
 	void FixedUpdate ()
@@ -166,10 +164,18 @@ public class Player : Photon.MonoBehaviour {
 
 	bool isGrounded()
 	{
-		if (Physics2D.Linecast(transform.position, groundCheck.position, 1 << LayerMask.NameToLayer("Platform")))
+		if (Physics2D.Linecast(transform.position, new Vector2(transform.position.x, transform.position.y - 2.4f), 1 << LayerMask.NameToLayer("Platform")))
 		{
-			//anim.ResetTrigger("Jump");
-			//anim.SetBool("Land", false);
+			anim.SetBool("jump", false);
+			return true;
+		}
+		if (Physics2D.Linecast(transform.position, new Vector2(transform.position.x - 1.2f, transform.position.y - 2.4f), 1 << LayerMask.NameToLayer("Platform")))
+		{
+			anim.SetBool("jump", false);
+			return true;
+		}
+		if (Physics2D.Linecast(transform.position, new Vector2(transform.position.x + 1.2f, transform.position.y - 2.4f), 1 << LayerMask.NameToLayer("Platform")))
+		{
 			anim.SetBool("jump", false);
 			return true;
 		}
