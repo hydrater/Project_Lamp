@@ -31,6 +31,8 @@ public class Player : Photon.MonoBehaviour {
 	[SerializeField]
 	private float attackForce = 1;
 
+	private bool isMoving = false;
+
 	Vector3 realPosition;
 
 	// Use this for initialization
@@ -50,9 +52,10 @@ public class Player : Photon.MonoBehaviour {
 			grounded = isGrounded ();
 
 			// Handles the jump 
-			if (Input.GetKey (KeyCode.Space) && grounded && !jump) {
+			if (Input.GetKey (KeyCode.Space) && grounded && !jump && anim.GetCurrentAnimatorStateInfo(0).IsTag("free")) {
 				rb2d.AddForce (Vector2.up * jumpForce);
 				jump = true;
+				anim.SetBool ("jump", true);
 			}
 
 			// Handles the movement for left and right
@@ -60,17 +63,38 @@ public class Player : Photon.MonoBehaviour {
 			transform.position += new Vector3(horizontal * movementSpeed * Time.deltaTime, 0, 0);
 
 			// We do not want the player head to collide with the platform above
-			if (rb2d.velocity.y > 0) {
-				bc2d.enabled = false;
-			} else {
-				bc2d.enabled = true;
+			if (jump) {
+				if (rb2d.velocity.y > 0) {
+					//bc2d.enabled = false;
+					anim.SetBool ("falling", false);
+				} else {
+					//bc2d.enabled = true;
+					anim.SetBool ("falling", true);
+					Debug.Log ("A");
+				}
 			}
+
+			anim.SetFloat ("horizontal", horizontal);
 
 			// Sprite flipping
 			if (horizontal > 0 && !facingRight) {
 				Flip ();
 			} else if (horizontal < 0 && facingRight) {
 				Flip ();
+			}
+
+			if (horizontal != 0 || jump) {
+				isMoving = true;
+			} else {
+				isMoving = false;
+			}
+
+			anim.SetBool ("isMoving", isMoving);
+
+			// Reset attacked
+			if(anim.GetCurrentAnimatorStateInfo(0).IsName("player_Idle")) {
+				anim.SetBool ("attacked", false);
+				anim.SetBool ("falling", false);
 			}
 		}
 		else
@@ -86,6 +110,7 @@ public class Player : Photon.MonoBehaviour {
 		{
 			//anim.ResetTrigger("Jump");
 			//anim.SetBool("Land", false);
+			anim.SetBool("jump", false);
 			jump = false;
 			return true;
 		}
