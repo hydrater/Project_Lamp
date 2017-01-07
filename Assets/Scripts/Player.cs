@@ -72,8 +72,6 @@ public class Player : Photon.MonoBehaviour {
 			anim.SetBool ("attack", false);
 			attack = false;
 
-			Debug.Log ("A");
-
 			anim.SetBool ("attacked", false);
 			attacked = false;
 			anim.SetBool ("falling", false);
@@ -167,13 +165,13 @@ public class Player : Photon.MonoBehaviour {
 	void OnCollisionEnter2D(Collision2D other)
 	{
 		// If the player collided with another object and is attacking, knock the other player back
-		if (attack && other.gameObject.tag == "Player") {
-			Debug.Log ("Attack");
+		if (other.gameObject.tag == "Player") {
 			//Rigidbody2D otherRb2d = other.gameObject.GetComponent<Rigidbody2D> ();
 			//Vector2 direction = (other.transform.position - transform.position).normalized;
 			//otherRb2d.AddForce (direction * attackForce);
 			//other.gameObject.GetComponent<Player> ().Attacked ();
 			if (other.gameObject.GetComponent<Player> ().attack) {
+				Debug.Log ("Attacked");
 				Vector2 direction = (transform.position - other.gameObject.transform.position).normalized;
 				rb2d.AddForce (direction * attackForce);
 				anim.SetBool ("attacked", true);
