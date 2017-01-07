@@ -16,7 +16,6 @@ public class Player : Photon.MonoBehaviour {
 	[HideInInspector]
 	public BoxCollider2D bc2d;
 
-	[HideInInspector]
 	public Animator anim;
 
 	public Transform groundCheck;
@@ -235,7 +234,7 @@ public class Player : Photon.MonoBehaviour {
 		{
 			realPosition = (Vector3)stream.ReceiveNext();
 			transform.localScale = (Vector3)stream.ReceiveNext();
-			anim.SetBool("isMoving", (bool)stream.ReceiveNext());
+ 			anim.SetBool("isMoving", (bool)stream.ReceiveNext());
 			anim.SetBool("jump", (bool)stream.ReceiveNext());
 		}
 	}
