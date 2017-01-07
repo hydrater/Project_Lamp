@@ -51,7 +51,7 @@ public class Player : MonoBehaviour {
 
 		// Handles the movement for left and right
 		float horizontal = Input.GetAxis ("Horizontal");
-		transform.Translate(Vector2.right * horizontal * movementSpeed * Time.deltaTime);
+		transform.position += new Vector3(horizontal * movementSpeed * Time.deltaTime, 0, 0);
 
 		// We do not want the player head to collide with the platform above
 		if (rb2d.velocity.y > 0) {
@@ -63,7 +63,7 @@ public class Player : MonoBehaviour {
 		// Sprite flipping
 		if (horizontal > 0 && !facingRight) {
 			Flip ();
-		} else if (horizontal < 0 && !facingRight) {
+		} else if (horizontal < 0 && facingRight) {
 			Flip ();
 		}
 	}
