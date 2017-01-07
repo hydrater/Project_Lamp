@@ -52,6 +52,8 @@ public class Player : Photon.MonoBehaviour {
 
 	SPECTATORMODE spectatorMode = SPECTATORMODE.TARGET;
 
+	private GameObject collidedPlayer = null;
+
 	void Awake() {
 		rb2d = GetComponent<Rigidbody2D> ();
 		bc2d = GetComponent<BoxCollider2D> ();
@@ -116,6 +118,16 @@ public class Player : Photon.MonoBehaviour {
 				attack = false;
 			}
 
+			if (collidedPlayer != null) {
+				if (collidedPlayer.GetComponent<Player> ().attack) {
+					Debug.Log ("Attacked");
+					Vector2 direction = (transform.position - collidedPlayer.transform.position).normalized;
+					rb2d.AddForce (direction * attackForce);
+					anim.SetBool ("attacked", true);
+					attacked = true;
+				}
+			}
+
 			// We do not want the player head to collide with the platform above
 			if (anim.GetBool("jump")) {
 				if (rb2d.velocity.y > 0) {
@@ -170,14 +182,15 @@ public class Player : Photon.MonoBehaviour {
 			//Vector2 direction = (other.transform.position - transform.position).normalized;
 			//otherRb2d.AddForce (direction * attackForce);
 			//other.gameObject.GetComponent<Player> ().Attacked ();
-			if (other.gameObject.GetComponent<Player> ().attack) {
-				Debug.Log ("Attacked");
-				Vector2 direction = (transform.position - other.gameObject.transform.position).normalized;
-				rb2d.AddForce (direction * attackForce);
-				anim.SetBool ("attacked", true);
-				attacked = true;
-			}
+			collidedPlayer = other.gameObject;
 		} 
+	}
+
+	void OnCollisionExit2D(Collision2D other)
+	{
+		if (collidedPlayer == other.gameObject) {
+			collidedPlayer = null;
+		}
 	}
 
 	void OnTriggerEnter2D(Collider2D other)
