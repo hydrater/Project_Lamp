@@ -263,6 +263,7 @@ public class Player : Photon.MonoBehaviour {
 			stream.SendNext(anim.GetBool("jump"));
 			stream.SendNext(attack);
 			stream.SendNext (attacked);
+			stream.SendNext(dead);
 		}
 		else
 		{
@@ -271,7 +272,8 @@ public class Player : Photon.MonoBehaviour {
  			anim.SetBool("isMoving", (bool)stream.ReceiveNext());
 			anim.SetBool("jump", (bool)stream.ReceiveNext());
 			attack = (bool)stream.ReceiveNext();
-			attacked = (bool)stream.ReceiveNext ();
+			attacked = (bool)stream.ReceiveNext();
+			dead = (bool)stream.ReceiveNext();
 		}
 	}
 }
