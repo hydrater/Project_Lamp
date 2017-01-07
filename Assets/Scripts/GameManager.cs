@@ -4,19 +4,29 @@ using System.Collections;
 public class GameManager : Photon.MonoBehaviour {
 
 	const string VERSION = "Prototype";
+	public GameObject loadingScreen;
 	
 	void Awake()
 	{
 		if (!PhotonNetwork.connected)
 			PhotonNetwork.ConnectUsingSettings(VERSION);
+	}
 
+	void OnJoinedLobby ()
+	{
 		RoomOptions roomOptions = new RoomOptions();
 		roomOptions.MaxPlayers = 20;
 		PhotonNetwork.JoinOrCreateRoom ("Only", roomOptions, TypedLobby.Default);
 	}
 
-	void Start () {
-	
+	void OnJoinedRoom()
+	{
+		loadingScreen.SetActive(false);
+		gameStart();
+	}
+
+	void Start () 
+	{
 	}
 	
 	void Update () {
@@ -26,6 +36,6 @@ public class GameManager : Photon.MonoBehaviour {
 	[PunRPC]
 	void gameStart()
 	{
-		//PhotonNetwork.Instantiate("Player", spawnPoint.position, spawnPoint.rotation, 0);
+		PhotonNetwork.Instantiate("Player", Vector3.zero, Quaternion.identity, 0);
 	}
 }

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Player : MonoBehaviour {
+public class Player : Photon.MonoBehaviour {
 
 	[HideInInspector]
 	public Rigidbody2D rb2d;
@@ -22,7 +22,7 @@ public class Player : MonoBehaviour {
 	private bool jump = false;
 
 	[SerializeField]
-	private float movementSpeed = 1;
+	private float movementSpeed;
 
 	private bool facingRight = true;
 
@@ -31,46 +31,53 @@ public class Player : MonoBehaviour {
 	[SerializeField]
 	private float attackForce = 1;
 
+	Vector3 realPosition;
+
 	// Use this for initialization
 	void Start () {
 		rb2d = GetComponent<Rigidbody2D> ();
 		bc2d = GetComponent<BoxCollider2D> ();
 		anim = GetComponent<Animator> ();
+		realPosition = transform.position;
+		if (!photonView.isMine) transform.GetChild(1).gameObject.SetActive(false);
 	}
 
 	void FixedUpdate()
 	{
-		// updates the grounded value
-		grounded = isGrounded ();
+		if (photonView.isMine)
+		{
+			// updates the grounded value
+			grounded = isGrounded ();
 
-		// Handles the jump 
-		if (Input.GetKey (KeyCode.Space) && grounded && !jump) {
-			rb2d.AddForce (Vector2.up * jumpForce);
-			jump = true;
+			// Handles the jump 
+			if (Input.GetKey (KeyCode.Space) && grounded && !jump) {
+				rb2d.AddForce (Vector2.up * jumpForce);
+				jump = true;
+			}
+
+			// Handles the movement for left and right
+			float horizontal = Input.GetAxis ("Horizontal");
+			transform.position += new Vector3(horizontal * movementSpeed * Time.deltaTime, 0, 0);
+
+			// We do not want the player head to collide with the platform above
+			if (rb2d.velocity.y > 0) {
+				bc2d.enabled = false;
+			} else {
+				bc2d.enabled = true;
+			}
+
+			// Sprite flipping
+			if (horizontal > 0 && !facingRight) {
+				Flip ();
+			} else if (horizontal < 0 && facingRight) {
+				Flip ();
+			}
+		}
+		else
+		{
+			transform.position = Vector3.Lerp(transform.position, realPosition, 0.1f);
 		}
 
-		// Handles the movement for left and right
-		float horizontal = Input.GetAxis ("Horizontal");
-		transform.position += new Vector3(horizontal * movementSpeed * Time.deltaTime, 0, 0);
-
-		// We do not want the player head to collide with the platform above
-		if (rb2d.velocity.y > 0) {
-			bc2d.enabled = false;
-		} else {
-			bc2d.enabled = true;
-		}
-
-		// Sprite flipping
-		if (horizontal > 0 && !facingRight) {
-			Flip ();
-		} else if (horizontal < 0 && facingRight) {
-			Flip ();
-		}
-	}
-
-	// Update is called once per frame
-	void Update () {
-		
 	}
 
 	bool isGrounded()
@@ -105,6 +112,18 @@ public class Player : MonoBehaviour {
 			Rigidbody2D otherRb2d = other.gameObject.GetComponent<Rigidbody2D> ();
 			Vector2 direction = (other.transform.position - transform.position).normalized;
 			otherRb2d.AddForce (direction * attackForce);
+		}
+	}
+
+	public void OnPhotonSerializeView (PhotonStream stream, PhotonMessageInfo info)
+	{
+		if (stream.isWriting)
+		{
+			stream.SendNext(transform.position);
+		}
+		else
+		{
+			realPosition = (Vector3)stream.ReceiveNext();
 		}
 	}
 }
