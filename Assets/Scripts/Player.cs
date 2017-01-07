@@ -16,6 +16,7 @@ public class Player : Photon.MonoBehaviour {
 	[HideInInspector]
 	public BoxCollider2D bc2d;
 
+	[HideInInspector]
 	public Animator anim;
 
 	public Transform groundCheck;
@@ -25,7 +26,7 @@ public class Player : Photon.MonoBehaviour {
 
 	private bool grounded = false;
 
-	private bool jump = false;
+	//private bool jump = false;
 
 	[SerializeField]
 	private float movementSpeed;
@@ -38,8 +39,6 @@ public class Player : Photon.MonoBehaviour {
 
 	[SerializeField]
 	private float attackForce = 1;
-
-	private bool isMoving = false;
 
 	private bool dead = false;
 
@@ -78,9 +77,8 @@ public class Player : Photon.MonoBehaviour {
 			}
 
 			// Handles the jump 
-			if (Input.GetKey (KeyCode.Space) && grounded && !jump && anim.GetCurrentAnimatorStateInfo (0).IsTag ("free")) {
+			if (Input.GetKey (KeyCode.Space) && grounded && !anim.GetBool("jump") && anim.GetCurrentAnimatorStateInfo (0).IsTag ("free")) {
 				rb2d.AddForce (Vector2.up * jumpForce);
-				jump = true;
 				anim.SetBool ("jump", true);
 			}
 
@@ -102,7 +100,7 @@ public class Player : Photon.MonoBehaviour {
 			}
 
 			// We do not want the player head to collide with the platform above
-			if (jump) {
+			if (anim.GetBool("jump")) {
 				if (rb2d.velocity.y > 0) {
 					//bc2d.enabled = false;
 					anim.SetBool ("falling", false);
@@ -112,13 +110,11 @@ public class Player : Photon.MonoBehaviour {
 				}
 			}
 
-			if (horizontal != 0 && !jump && anim.GetCurrentAnimatorStateInfo (0).IsTag ("free")) {
-				isMoving = true;
+			if (horizontal != 0 && !anim.GetBool("jump") && anim.GetCurrentAnimatorStateInfo (0).IsTag ("free")) {
+				anim.SetBool ("isMoving", true);
 			} else {
-				isMoving = false;
+				anim.SetBool ("isMoving", false);
 			}
-
-			anim.SetBool ("isMoving", isMoving);
 
 			// Reset attacked
 			if (anim.GetCurrentAnimatorStateInfo (0).IsName ("player_Idle")) {
@@ -150,7 +146,6 @@ public class Player : Photon.MonoBehaviour {
 			//anim.ResetTrigger("Jump");
 			//anim.SetBool("Land", false);
 			anim.SetBool("jump", false);
-			jump = false;
 			return true;
 		}
 		return false;
@@ -236,8 +231,9 @@ public class Player : Photon.MonoBehaviour {
 		{
 			stream.SendNext(transform.position);
 			stream.SendNext(transform.localScale);
-			stream.SendNext(isMoving);
-			stream.SendNext(jump);
+			stream.SendNext(anim.GetBool ("isMoving"));
+			stream.SendNext(anim.GetBool("jump"));
+			stream.SendNext(attack);
 		}
 		else
 		{
@@ -245,6 +241,7 @@ public class Player : Photon.MonoBehaviour {
 			transform.localScale = (Vector3)stream.ReceiveNext();
  			anim.SetBool("isMoving", (bool)stream.ReceiveNext());
 			anim.SetBool("jump", (bool)stream.ReceiveNext());
+			attack = (bool)stream.ReceiveNext();
 		}
 	}
 }
