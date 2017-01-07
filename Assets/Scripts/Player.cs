@@ -176,7 +176,8 @@ public class Player : Photon.MonoBehaviour {
 			if (other.gameObject.GetComponent<Player> ().attack) {
 				Vector2 direction = (transform.position - other.gameObject.transform.position).normalized;
 				rb2d.AddForce (direction * attackForce);
-				Attacked ();
+				anim.SetBool ("attacked", true);
+				attacked = true;
 			}
 		} 
 	}
@@ -230,12 +231,6 @@ public class Player : Photon.MonoBehaviour {
 		if (spectatorMode != SPECTATORMODE.MANUAL) {
 			transform.position = target;
 		}
-	}
-
-	public void Attacked()
-	{
-		anim.SetBool ("attacked", true);
-		attacked = true;
 	}
 
 	public void OnPhotonSerializeView (PhotonStream stream, PhotonMessageInfo info)
