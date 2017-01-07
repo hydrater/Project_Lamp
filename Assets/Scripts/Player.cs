@@ -63,6 +63,16 @@ public class Player : Photon.MonoBehaviour {
 
 	void FixedUpdate ()
 	{
+		// Reset attack
+		anim.SetBool ("attack", false);
+
+		// Reset attacked
+		if (anim.GetCurrentAnimatorStateInfo (0).IsName ("player_Idle")) {
+			anim.SetBool ("attacked", false);
+			attacked = false;
+			anim.SetBool ("falling", false);
+		}
+
 		if (photonView.isMine) {
 			if (dead) {
 				UpdateSpectatorMode ();
@@ -86,7 +96,7 @@ public class Player : Photon.MonoBehaviour {
 			float horizontal = Input.GetAxis ("Horizontal");
 			transform.position += new Vector3 (horizontal * movementSpeed * Time.deltaTime, 0, 0);
 
-			anim.SetBool ("attack", false);
+
 
 			// Handles the attack
 			if (Input.GetMouseButton (0) || Input.GetKey(KeyCode.C)) {
@@ -116,13 +126,6 @@ public class Player : Photon.MonoBehaviour {
 				anim.SetBool ("isMoving", false);
 			}
 
-			// Reset attacked
-			if (anim.GetCurrentAnimatorStateInfo (0).IsName ("player_Idle")) {
-				anim.SetBool ("attacked", false);
-				attacked = false;
-				anim.SetBool ("falling", false);
-			}
-
 			// Sprite flipping
 			if ((horizontal > 0 && !facingRight) || (horizontal < 0 && facingRight)) 
 			{
@@ -137,6 +140,7 @@ public class Player : Photon.MonoBehaviour {
 		{
 			transform.position = Vector3.Lerp(transform.position, realPosition, 0.1f);
 		}
+
 	}
 
 	bool isGrounded()
@@ -241,7 +245,7 @@ public class Player : Photon.MonoBehaviour {
 			transform.localScale = (Vector3)stream.ReceiveNext();
  			anim.SetBool("isMoving", (bool)stream.ReceiveNext());
 			anim.SetBool("jump", (bool)stream.ReceiveNext());
-			attack = (bool)stream.ReceiveNext();
+			anim.SetBool("attack", (bool)stream.ReceiveNext());
 		}
 	}
 }
