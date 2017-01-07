@@ -33,7 +33,6 @@ public class Player : Photon.MonoBehaviour {
 
 	private bool isMoving = false;
 
-	float horizontal = 0;
 
 	Vector3 realPosition;
 
@@ -48,6 +47,7 @@ public class Player : Photon.MonoBehaviour {
 
 	void FixedUpdate()
 	{
+		float horizontal = 0;
 		if (photonView.isMine)
 		{
 			// updates the grounded value
@@ -93,12 +93,8 @@ public class Player : Photon.MonoBehaviour {
 		{
 			transform.position = Vector3.Lerp(transform.position, realPosition, 0.1f);
 		}
-	}
-
-	void lateUpdate()
-	{
 		// Sprite flipping
-		if ((horizontal > 0 && !facingRight) || (horizontal < 0 && facingRight)) Flip ();
+		if ((horizontal > 0 && !facingRight) || (horizontal < 0 && facingRight)) Flip (photonView.ownerId);
 	}
 
 	bool isGrounded()
@@ -115,8 +111,10 @@ public class Player : Photon.MonoBehaviour {
 	}
 
 	// Flip the player sprite
-	void Flip()
+	[PunRPC]
+	void Flip(int id)
 	{
+		if (photonView.ownerId != id) return;
 		facingRight = !facingRight;
 
 		Vector3 scale = transform.localScale;
@@ -145,7 +143,6 @@ public class Player : Photon.MonoBehaviour {
 			stream.SendNext(isMoving);
 			stream.SendNext(jump);
 			stream.SendNext(facingRight);
-			stream.SendNext(horizontal);
 		}
 		else
 		{
@@ -153,7 +150,6 @@ public class Player : Photon.MonoBehaviour {
 			anim.SetBool("isMoving", (bool)stream.ReceiveNext());
 			anim.SetBool("jump", (bool)stream.ReceiveNext());
 			facingRight = (bool)stream.ReceiveNext();
-			horizontal = (float)stream.ReceiveNext();
 		}
 	}
 }
