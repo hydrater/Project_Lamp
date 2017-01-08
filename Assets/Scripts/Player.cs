@@ -120,17 +120,6 @@ public class Player : Photon.MonoBehaviour {
 
 			if (!anim.GetCurrentAnimatorStateInfo (0).IsTag ("Attack")) attack = false;
 
-//			if (collidedPlayer != null) {
-//				if (collidedPlayer.GetComponent<Player> ().attack) 
-//				{
-//					Debug.Log ("Attacked");
-//					Vector2 direction = (transform.position - collidedPlayer.transform.position).normalized;
-//					rb2d.AddForce (direction * attackForce);
-//					anim.SetBool ("attacked", true);
-//					attacked = true;
-//				}
-//			}
-
 			// We do not want the player head to collide with the platform above
 			if (anim.GetBool("jump")) {
 				if (rb2d.velocity.y > 0) {
@@ -202,9 +191,6 @@ public class Player : Photon.MonoBehaviour {
 		rb2d.isKinematic = true;
 		bc2d.enabled = false;
 		GetComponent<SpriteRenderer>().enabled = false;
-		AudioSource audioS = GetComponent<AudioSource>();
-		audioS.clip = splashes[Random.Range(0,3)];
-		audioS.Play();
 	}
 
 	void OnTriggerEnter2D(Collider2D other)
@@ -212,6 +198,9 @@ public class Player : Photon.MonoBehaviour {
 		if (other.gameObject.tag == "Water") 
 		{
 			RIP();
+			AudioSource audioS = GetComponent<AudioSource>();
+			audioS.clip = splashes[Random.Range(0,3)];
+			audioS.Play();
 		}
 
 		// If the player collided with another player which is attacking, knock the player back
