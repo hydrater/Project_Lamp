@@ -81,15 +81,15 @@ public class Player : Photon.MonoBehaviour {
 				return;
 			}
 
-			// When the player goes back to idle from dizzy, reset the values
-			if (anim.GetCurrentAnimatorStateInfo (0).IsName ("player_Dizzy")) 
-			{
-				anim.SetBool ("attacked", false);
-				attacked = false;
-			}
-
 			// updates the grounded value
 			grounded = isGrounded ();
+
+			if (anim.GetCurrentAnimatorStateInfo (0).IsName ("player_Idle")) {
+				if(!attacked)
+					anim.ResetTrigger ("attacked");
+				if(!attack)
+					anim.ResetTrigger ("attack");
+			}
 
 			if (anim.GetCurrentAnimatorStateInfo (0).IsName ("player_Dizzy")) {
 				return;
@@ -99,7 +99,7 @@ public class Player : Photon.MonoBehaviour {
 			if (Input.GetKey (KeyCode.Space) && grounded && anim.GetCurrentAnimatorStateInfo (0).IsTag ("free")) {
 				rb2d.AddForce (Vector2.up * jumpForce);
 				anim.SetBool ("jump", true);
-				attackTimer = 0;
+				attack = false;
 			}
 
 			// Handles the movement for left and right
@@ -137,12 +137,6 @@ public class Player : Photon.MonoBehaviour {
 				facingRight = !facingRight;
 			}
 
-			// Set the bool to false straight away to ensure that player does not attack twice.
-			if (anim.GetCurrentAnimatorStateInfo (0).IsTag ("Attack")) 
-			{
-				anim.SetBool ("attack", false);
-			}
-
 			// If grounded and cooldown finish, player is able to attack. Timer is to ensure that player cannot spam attack while grounded
 			if(attack)
 			{				
@@ -159,9 +153,9 @@ public class Player : Photon.MonoBehaviour {
 			{
 				if (!attack) 
 				{
-					Debug.Log ("BOOL ATK");
-					anim.SetBool ("attack", true);
+					SetAttack ();
 					attack = true;
+					attackTimer = 1;
 				}
 			}
 		}
@@ -210,6 +204,18 @@ public class Player : Photon.MonoBehaviour {
 		bc2d.enabled = false;
 		GetComponent<SpriteRenderer>().enabled = false;
 		GameObject.FindGameObjectsWithTag ("Manager")[0].GetComponent<GameManager>().CheckForWinner();
+	}
+
+	[PunRPC]
+	void SetDizzy()
+	{
+		anim.SetTrigger ("attacked");
+	}
+
+	[PunRPC]
+	void SetAttack()
+	{
+		anim.SetTrigger ("attack");
 	}
 
 	void OnTriggerEnter2D(Collider2D other)
