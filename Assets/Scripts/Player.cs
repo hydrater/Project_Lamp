@@ -218,7 +218,7 @@ public class Player : Photon.MonoBehaviour {
 			transform.GetChild(1).gameObject.SetActive(true);
 			anim.SetTrigger ("attack");
 
-			StartCoroutine (waitForOneSecond);
+			StartCoroutine (waitForOneSecond());
 		}
 	}
 
