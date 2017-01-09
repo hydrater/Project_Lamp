@@ -88,7 +88,10 @@ public class Player : Photon.MonoBehaviour {
 				if(!attacked)
 					anim.ResetTrigger ("attacked");
 				if(!attack)
+				{
+					transform.GetChild(1).gameObject.SetActive(false);
 					anim.ResetTrigger ("attack");
+				}
 			}
 
 			if (anim.GetCurrentAnimatorStateInfo (0).IsName ("player_Dizzy")) {
@@ -153,7 +156,7 @@ public class Player : Photon.MonoBehaviour {
 			{
 				if (!attack) 
 				{
-					photonView.RPC ("SetAttack", PhotonTargets.All, photonView.ownerId);
+					photonView.RPC ("SetAttack", PhotonTargets.All, photonView.viewID);
 					attack = true;
 					attackTimer = 1;
 				}
@@ -166,11 +169,6 @@ public class Player : Photon.MonoBehaviour {
 				if (GetComponent<SpriteRenderer>().enabled)
 					RIP();
 		}
-
-		if (attack)
-			transform.GetChild(1).gameObject.SetActive(true);
-		else
-			transform.GetChild(1).gameObject.SetActive(false);
 	}
 
 	bool isGrounded()
@@ -207,15 +205,18 @@ public class Player : Photon.MonoBehaviour {
 	[PunRPC]
 	void SetDizzy(int id)
 	{
-		if (photonView.ownerId == id)
+		if (photonView.viewID == id)
 			anim.SetTrigger ("attacked");
 	}
 
 	[PunRPC]
 	void SetAttack(int id)
 	{
-		if (photonView.ownerId == id)
+		if (photonView.viewID == id)
+		{
+			transform.GetChild(1).gameObject.SetActive(true);
 			anim.SetTrigger ("attack");
+		}
 	}
 
 	void OnTriggerEnter2D(Collider2D other)
@@ -236,8 +237,7 @@ public class Player : Photon.MonoBehaviour {
 				attacked = true;
 				Vector2 direction = (transform.position - other.transform.parent.position).normalized;
 				rb2d.AddForce (direction * attackForce);
-				anim.SetBool ("attacked", true);
-				photonView.RPC ("SetDizzy", PhotonTargets.All, photonView.ownerId);
+				photonView.RPC ("SetDizzy", PhotonTargets.All, photonView.viewID);
 				Debug.Log("Ouch!");
 			} 
 		}
