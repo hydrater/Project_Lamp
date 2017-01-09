@@ -81,18 +81,11 @@ public class Player : Photon.MonoBehaviour {
 				return;
 			}
 
-			//anim.SetBool ("attack", false);
-
-			// Reset attacked
+			// When the player goes back to idle from dizzy, reset the values
 			if (anim.GetCurrentAnimatorStateInfo (0).IsName ("player_Idle")) 
 			{
-				// Reset attack
-
-				//attack = false;
-
 				anim.SetBool ("attacked", false);
 				attacked = false;
-				//anim.SetBool ("falling", false);
 			}
 
 			// updates the grounded value
@@ -232,7 +225,7 @@ public class Player : Photon.MonoBehaviour {
 		// If the player collided with another player which is attacking, knock the player back
 		if (photonView.isMine)
 		{
-			if (other.gameObject.tag == "Hit") 
+			if (other.gameObject.tag == "Hit" && !attacked) 
 			{
 				attacked = true;
 				Vector2 direction = (transform.position - other.transform.parent.position).normalized;
