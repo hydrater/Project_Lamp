@@ -52,12 +52,14 @@ public class Player : Photon.MonoBehaviour {
 
 	SPECTATORMODE spectatorMode = SPECTATORMODE.TARGET;
 
+	private float attackTimer = 1;
+
 	void Awake() {
 		rb2d = GetComponent<Rigidbody2D> ();
 		bc2d = GetComponent<BoxCollider2D> ();
 		anim = GetComponent<Animator> ();
-		if (!photonView.isMine)
-			Destroy (GetComponent<Rigidbody2D>());
+		//if (!photonView.isMine)
+			//Destroy (GetComponent<Rigidbody2D>());
 	}
 
 	// Use this for initialization
@@ -79,16 +81,18 @@ public class Player : Photon.MonoBehaviour {
 				return;
 			}
 
+			//anim.SetBool ("attack", false);
+
 			// Reset attacked
 			if (anim.GetCurrentAnimatorStateInfo (0).IsName ("player_Idle")) 
 			{
 				// Reset attack
-				anim.SetBool ("attack", false);
-				attack = false;
+
+				//attack = false;
 
 				anim.SetBool ("attacked", false);
 				attacked = false;
-				anim.SetBool ("falling", false);
+				//anim.SetBool ("falling", false);
 			}
 
 			// updates the grounded value
@@ -99,37 +103,30 @@ public class Player : Photon.MonoBehaviour {
 			}
 
 			// Handles the jump 
-			if (Input.GetKey (KeyCode.Space) && grounded && !anim.GetBool("jump") && anim.GetCurrentAnimatorStateInfo (0).IsTag ("free")) {
+			if (Input.GetKey (KeyCode.Space) && grounded && anim.GetCurrentAnimatorStateInfo (0).IsTag ("free")) {
 				rb2d.AddForce (Vector2.up * jumpForce);
 				anim.SetBool ("jump", true);
+				attackTimer = 0;
 			}
 
 			// Handles the movement for left and right
 			float horizontal = Input.GetAxis ("Horizontal");
 			transform.position += new Vector3 (horizontal * movementSpeed * Time.deltaTime, 0, 0);
 
-			// Handles the attack
-			if (Input.GetMouseButton (0) || Input.GetKey(KeyCode.C)) 
-			{
-				if (!attack) 
-				{
-					anim.SetBool ("attack", true);
-					attack = true;
-				}
-			}
-
-			if (!anim.GetCurrentAnimatorStateInfo (0).IsTag ("Attack")) attack = false;
-
 			// We do not want the player head to collide with the platform above
-			if (anim.GetBool("jump")) {
-				if (rb2d.velocity.y > 0) {
-					//bc2d.enabled = false;
-					anim.SetBool ("falling", false);
-				} else {
-					//bc2d.enabled = true;
-					anim.SetBool ("falling", true);
-				}
+			//if (anim.GetBool("jump")) {
+
+			if(rb2d.velocity.y < 0)
+			{
+				//bc2d.enabled = true;
+				anim.SetBool ("falling", true);
 			}
+
+			if (rb2d.velocity.y > 0 || grounded) {
+				//bc2d.enabled = false;
+				anim.SetBool ("falling", false);
+			} 
+			//}
 
 			if (horizontal != 0 && !anim.GetBool("jump") && anim.GetCurrentAnimatorStateInfo (0).IsTag ("free")) {
 				anim.SetBool ("isMoving", true);
@@ -145,6 +142,34 @@ public class Player : Photon.MonoBehaviour {
 
 				transform.localScale = scale;
 				facingRight = !facingRight;
+			}
+
+			// Set the bool to false straight away to ensure that player does not attack twice.
+			if (anim.GetCurrentAnimatorStateInfo (0).IsTag ("Attack")) 
+			{
+				anim.SetBool ("attack", false);
+			}
+
+			// If grounded and cooldown finish, player is able to attack. Timer is to ensure that player cannot spam attack while grounded
+			if(attack)
+			{				
+				attackTimer -= Time.deltaTime;
+				if (attackTimer <= 0 && grounded) 
+				{
+					attack = false;
+					attackTimer = 1;
+				}
+			}
+
+			// Handles the attack
+			if (Input.GetMouseButton (0) || Input.GetKey(KeyCode.C)) 
+			{
+				if (!attack) 
+				{
+					Debug.Log ("BOOL ATK");
+					anim.SetBool ("attack", true);
+					attack = true;
+				}
 			}
 		}
 		else
