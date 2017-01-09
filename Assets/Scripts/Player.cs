@@ -50,7 +50,7 @@ public class Player : Photon.MonoBehaviour {
 
 	public AudioClip[] splashes;
 
-	SPECTATORMODE spectatorMode = SPECTATORMODE.TARGET;
+	SPECTATORMODE spectatorMode = SPECTATORMODE.MANUAL;
 
 	private float attackTimer = 1;
 
