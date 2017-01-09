@@ -73,6 +73,17 @@ public class Player : Photon.MonoBehaviour {
 		Debug.Log("attacked " + attacked);
 		Debug.Log("attack " + attack);
 
+		if (anim.GetCurrentAnimatorStateInfo (0).IsName ("player_Idle")) 
+		{
+			if(!attacked)
+				anim.ResetTrigger ("attacked");
+			if(!attack)
+			{
+				transform.GetChild(1).gameObject.SetActive(false);
+				anim.ResetTrigger ("attack");
+			}
+		}
+
 		if (photonView.isMine) 
 		{
 			if (dead) 
@@ -84,15 +95,7 @@ public class Player : Photon.MonoBehaviour {
 			// updates the grounded value
 			grounded = isGrounded ();
 
-			if (anim.GetCurrentAnimatorStateInfo (0).IsName ("player_Idle")) {
-				if(!attacked)
-					anim.ResetTrigger ("attacked");
-				if(!attack)
-				{
-					transform.GetChild(1).gameObject.SetActive(false);
-					anim.ResetTrigger ("attack");
-				}
-			}
+
 
 			if (anim.GetCurrentAnimatorStateInfo (0).IsName ("player_Dizzy")) {
 				return;
