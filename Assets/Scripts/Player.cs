@@ -96,6 +96,7 @@ public class Player : Photon.MonoBehaviour {
 			grounded = isGrounded ();
 
 			if (anim.GetCurrentAnimatorStateInfo (0).IsName ("player_Dizzy")) {
+				transform.GetChild(1).gameObject.SetActive(false);
 				return;
 			}
 
@@ -206,8 +207,11 @@ public class Player : Photon.MonoBehaviour {
 	[PunRPC]
 	void SetDizzy(int id)
 	{
-		if (photonView.viewID == id)
+		if (photonView.viewID == id) 
+		{
 			anim.SetTrigger ("attacked");
+			transform.GetChild(1).gameObject.SetActive(false);
+		}
 	}
 
 	[PunRPC]
