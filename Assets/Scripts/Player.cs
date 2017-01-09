@@ -82,7 +82,7 @@ public class Player : Photon.MonoBehaviour {
 			}
 
 			// When the player goes back to idle from dizzy, reset the values
-			if (anim.GetCurrentAnimatorStateInfo (0).IsName ("player_Idle")) 
+			if (anim.GetCurrentAnimatorStateInfo (0).IsName ("player_Dizzy")) 
 			{
 				anim.SetBool ("attacked", false);
 				attacked = false;
