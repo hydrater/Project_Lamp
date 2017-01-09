@@ -153,7 +153,7 @@ public class Player : Photon.MonoBehaviour {
 			{
 				if (!attack) 
 				{
-					SetAttack ();
+					photonView.RPC ("SetAttack", PhotonTargets.All, photonView.ownerId);
 					attack = true;
 					attackTimer = 1;
 				}
@@ -207,15 +207,17 @@ public class Player : Photon.MonoBehaviour {
 	}
 
 	[PunRPC]
-	void SetDizzy()
+	void SetDizzy(int id)
 	{
-		anim.SetTrigger ("attacked");
+		if (photonView.ownerId == id)
+			anim.SetTrigger ("attacked");
 	}
 
 	[PunRPC]
-	void SetAttack()
+	void SetAttack(int id)
 	{
-		anim.SetTrigger ("attack");
+		if (photonView.ownerId == id)
+			anim.SetTrigger ("attack");
 	}
 
 	void OnTriggerEnter2D(Collider2D other)
@@ -237,6 +239,7 @@ public class Player : Photon.MonoBehaviour {
 				Vector2 direction = (transform.position - other.transform.parent.position).normalized;
 				rb2d.AddForce (direction * attackForce);
 				anim.SetBool ("attacked", true);
+				photonView.RPC ("SetDizzy", PhotonTargets.All, photonView.ownerId);
 				Debug.Log("Ouch!");
 			} 
 		}
