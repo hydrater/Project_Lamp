@@ -52,6 +52,8 @@ public class Player : Photon.MonoBehaviour {
 
 	SPECTATORMODE spectatorMode = SPECTATORMODE.MANUAL;
 
+	[SerializeField]
+	private float attackCooldown = 1;
 	private float attackTimer = 1;
 
 	void Awake() {
@@ -75,13 +77,11 @@ public class Player : Photon.MonoBehaviour {
 
 		if (anim.GetCurrentAnimatorStateInfo (0).IsName ("player_Idle")) 
 		{
-			if(!attacked)
-				anim.ResetTrigger ("attacked");
-			if(!attack)
-			{
-				transform.GetChild(1).gameObject.SetActive(false);
-				anim.ResetTrigger ("attack");
-			}
+			anim.ResetTrigger ("attacked");
+			attacked = false;
+
+			//transform.GetChild(1).gameObject.SetActive(false);
+			//anim.ResetTrigger ("attack");
 		}
 
 		if (photonView.isMine) 
@@ -94,8 +94,6 @@ public class Player : Photon.MonoBehaviour {
 
 			// updates the grounded value
 			grounded = isGrounded ();
-
-
 
 			if (anim.GetCurrentAnimatorStateInfo (0).IsName ("player_Dizzy")) {
 				return;
@@ -219,7 +217,17 @@ public class Player : Photon.MonoBehaviour {
 		{
 			transform.GetChild(1).gameObject.SetActive(true);
 			anim.SetTrigger ("attack");
+
+			StartCoroutine (waitForOneSecond);
 		}
+	}
+
+	IEnumerator waitForOneSecond()
+	{
+		yield return new WaitForSeconds (1);
+
+		anim.ResetTrigger ("attack");
+		transform.GetChild(1).gameObject.SetActive(false);
 	}
 
 	void OnTriggerEnter2D(Collider2D other)
@@ -235,7 +243,7 @@ public class Player : Photon.MonoBehaviour {
 		// If the player collided with another player which is attacking, knock the player back
 		if (photonView.isMine)
 		{
-			if (other.gameObject.tag == "Hit" && !attacked) 
+			if (other.gameObject.tag == "Hit") 
 			{
 				attacked = true;
 				Vector2 direction = (transform.position - other.transform.parent.position).normalized;
