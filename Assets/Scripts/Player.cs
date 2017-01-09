@@ -162,8 +162,6 @@ public class Player : Photon.MonoBehaviour {
 		else
 		{
 			transform.position = Vector3.Lerp(transform.position, realPosition, 0.1f);
-			anim.SetBool ("attack", attack);
-			anim.SetBool ("attacked", attacked);
 			if(dead)
 				if (GetComponent<SpriteRenderer>().enabled)
 					RIP();
@@ -292,8 +290,6 @@ public class Player : Photon.MonoBehaviour {
 			stream.SendNext(transform.localScale);
 			stream.SendNext(anim.GetBool ("isMoving"));
 			stream.SendNext(anim.GetBool("jump"));
-			stream.SendNext(attack);
-			stream.SendNext (attacked);
 			stream.SendNext(dead);
 		}
 		else
@@ -302,8 +298,6 @@ public class Player : Photon.MonoBehaviour {
 			transform.localScale = (Vector3)stream.ReceiveNext();
  			anim.SetBool("isMoving", (bool)stream.ReceiveNext());
 			anim.SetBool("jump", (bool)stream.ReceiveNext());
-			attack = (bool)stream.ReceiveNext();
-			attacked = (bool)stream.ReceiveNext();
 			dead = (bool)stream.ReceiveNext();
 		}
 	}
