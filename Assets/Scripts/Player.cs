@@ -38,7 +38,7 @@ public class Player : Photon.MonoBehaviour {
 	[SerializeField]
 	private float attackForce = 100;
 
-	private bool dead = false;
+	public bool dead = false;
 
 	private Vector3 target = Vector3.zero;
 
@@ -191,6 +191,7 @@ public class Player : Photon.MonoBehaviour {
 		rb2d.isKinematic = true;
 		bc2d.enabled = false;
 		GetComponent<SpriteRenderer>().enabled = false;
+		GameObject.FindGameObjectsWithTag ("Manager")[0].GetComponent<GameManager>().CheckForWinner();
 	}
 
 	void OnTriggerEnter2D(Collider2D other)
