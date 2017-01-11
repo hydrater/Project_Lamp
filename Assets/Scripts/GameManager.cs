@@ -82,5 +82,7 @@ public class GameManager : Photon.MonoBehaviour {
 			win.SetActive(true);
 			water.SetActive(false);
 		}
+
+		//Timer, game start
 	}
 }
