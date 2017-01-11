@@ -33,8 +33,6 @@ public class Player : Photon.MonoBehaviour {
 
 	private bool attack = false;
 
-	private bool attacked = false;
-
 	[SerializeField]
 	private float attackForce = 100;
 
@@ -73,14 +71,9 @@ public class Player : Photon.MonoBehaviour {
 
 	void FixedUpdate ()
 	{
-		Debug.Log("attacked " + attacked);
-		Debug.Log("attack " + attack);
-
 		if (anim.GetCurrentAnimatorStateInfo (0).IsName ("player_Idle")) 
 		{
 			anim.ResetTrigger ("attacked");
-			attacked = false;
-
 			//transform.GetChild(1).gameObject.SetActive(false);
 			//anim.ResetTrigger ("attack");
 		}
@@ -125,7 +118,6 @@ public class Player : Photon.MonoBehaviour {
 				//bc2d.enabled = false;
 				anim.SetBool ("falling", false);
 			} 
-			//}
 
 			if (horizontal != 0 && !anim.GetBool("jump") && anim.GetCurrentAnimatorStateInfo (0).IsTag ("free")) {
 				anim.SetBool ("isMoving", true);
@@ -252,7 +244,6 @@ public class Player : Photon.MonoBehaviour {
 		{
 			if (other.gameObject.tag == "Hit") 
 			{
-				attacked = true;
 				Vector2 direction = (transform.position - other.transform.parent.position).normalized;
 				rb2d.AddForce (direction * attackForce);
 				photonView.RPC ("SetDizzy", PhotonTargets.All, photonView.viewID);
