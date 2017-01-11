@@ -13,8 +13,12 @@ public class MainMenu : Photon.MonoBehaviour {
 			nameInput.GetComponent<Text>().text = string.Format("Player{0}",Random.Range(0,999));
 	}
 
-	//connect and user pref setstring
-	
+	void Login()
+	{
+		PlayerPrefs.SetString("Player Name", nameInput);
+	}
+
+
 	// Update is called once per frame
 	void Update () {
 	

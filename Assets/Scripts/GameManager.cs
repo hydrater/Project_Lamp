@@ -15,6 +15,7 @@ public class GameManager : Photon.MonoBehaviour {
 				OnJoinedRoom();
 				Instantiate(Resources.Load("Player"), Vector3.zero, Quaternion.identity);
 			}
+		PhotonNetwork.playerName = PlayerPrefs.GetString("Player Name");
 	}
 
 	void OnJoinedLobby ()
