@@ -11,13 +11,7 @@ public class GameManager : Photon.MonoBehaviour {
 	{
 		if (!PhotonNetwork.connected)
 			PhotonNetwork.ConnectUsingSettings(VERSION);
-//			if (PhotonNetwork.offlineMode)
-//			{
-//				OnJoinedRoom();
-//				Instantiate(Resources.Load("Player"), Vector3.zero, Quaternion.identity);
-//			}
 		PhotonNetwork.playerName = PlayerPrefs.GetString("Player Name");
-
 	}
 
 	void OnJoinedLobby ()
@@ -60,6 +54,7 @@ public class GameManager : Photon.MonoBehaviour {
 	[PunRPC]
 	void GameStart()
 	{
+		//Snap players to start location
 		if (PhotonNetwork.isMasterClient)
 			water.transform.position = new Vector2(0.3f, -74);
 		water.SetActive(true);
