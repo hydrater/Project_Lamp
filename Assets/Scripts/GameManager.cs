@@ -10,12 +10,13 @@ public class GameManager : Photon.MonoBehaviour {
 	{
 		if (!PhotonNetwork.connected)
 			PhotonNetwork.ConnectUsingSettings(VERSION);
-			if (PhotonNetwork.offlineMode)
-			{
-				OnJoinedRoom();
-				Instantiate(Resources.Load("Player"), Vector3.zero, Quaternion.identity);
-			}
+//			if (PhotonNetwork.offlineMode)
+//			{
+//				OnJoinedRoom();
+//				Instantiate(Resources.Load("Player"), Vector3.zero, Quaternion.identity);
+//			}
 		PhotonNetwork.playerName = PlayerPrefs.GetString("Player Name");
+
 	}
 
 	void OnJoinedLobby ()
@@ -28,7 +29,16 @@ public class GameManager : Photon.MonoBehaviour {
 	void OnJoinedRoom()
 	{
 		loadingScreen.SetActive(false);
-		GameStart();
+		PhotonNetwork.Instantiate("Player", Vector3.zero, Quaternion.identity, 0);
+		GameObject[] players = GameObject.FindGameObjectsWithTag ("Player");
+		if (players.Length > 1)
+		{
+			if (!water.GetActive)
+				photonView.RPC ("GameStart", PhotonTargets.All, photonView.viewID);
+			else
+				water.SetActive(true);
+		}
+		//Player spawning with water issue
 	}
 
 	void Start () 
@@ -42,7 +52,10 @@ public class GameManager : Photon.MonoBehaviour {
 	[PunRPC]
 	void GameStart()
 	{
-		PhotonNetwork.Instantiate("Player", Vector3.zero, Quaternion.identity, 0);
+		if (PhotonNetwork.isMasterClient)
+		{
+			water.SetActive(true);
+		}
 	}
 
 	public void CheckForWinner()
