@@ -36,7 +36,7 @@ public class GameManager : Photon.MonoBehaviour {
 			PhotonNetwork.Instantiate("Player", Vector3.zero, Quaternion.identity, 0);
 		if (players.Length > 1)
 		{
-			if (!water.GetActive)
+			if (!water.GetActive())
 				photonView.RPC ("GameStart", PhotonTargets.All, photonView.viewID);
 			else
 				water.SetActive(true);
