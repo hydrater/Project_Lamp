@@ -196,7 +196,17 @@ public class Player : Photon.MonoBehaviour {
 		rb2d.isKinematic = true;
 		bc2d.enabled = false;
 		GetComponent<SpriteRenderer>().enabled = false;
+		transform.GetChild(1).gameObject.SetActive(false);
 		GameObject.FindGameObjectsWithTag ("Manager")[0].GetComponent<GameManager>().CheckForWinner();
+	}
+
+	public void Respawn()
+	{
+		if (!dead)
+			return;
+		GetComponent<SpriteRenderer>().enabled = true;
+		rb2d.isKinematic = false;
+		bc2d.enabled = true;
 	}
 
 	[PunRPC]

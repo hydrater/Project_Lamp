@@ -5,6 +5,7 @@ public class GameManager : Photon.MonoBehaviour {
 
 	const string VERSION = "Prototype";
 	public GameObject loadingScreen, win, lose, water;
+	GameObject[] players;
 	
 	void Awake()
 	{
@@ -29,8 +30,10 @@ public class GameManager : Photon.MonoBehaviour {
 	void OnJoinedRoom()
 	{
 		loadingScreen.SetActive(false);
-		PhotonNetwork.Instantiate("Player", Vector3.zero, Quaternion.identity, 0);
-		GameObject[] players = GameObject.FindGameObjectsWithTag ("Player");
+		UpdatePlayers();
+
+		if (players.Length < 3)
+			PhotonNetwork.Instantiate("Player", Vector3.zero, Quaternion.identity, 0);
 		if (players.Length > 1)
 		{
 			if (!water.GetActive)
@@ -39,6 +42,11 @@ public class GameManager : Photon.MonoBehaviour {
 				water.SetActive(true);
 		}
 		//Player spawning with water issue
+	}
+
+	private void UpdatePlayers()
+	{
+		players = GameObject.FindGameObjectsWithTag ("Player");
 	}
 
 	void Start () 
@@ -53,14 +61,16 @@ public class GameManager : Photon.MonoBehaviour {
 	void GameStart()
 	{
 		if (PhotonNetwork.isMasterClient)
-		{
-			water.SetActive(true);
-		}
+			water.transform.position = new Vector2(0.3f, -74);
+		water.SetActive(true);
+		UpdatePlayers();
+		foreach (GameObject p in players)
+			p.GetComponent<Player>().Respawn();
 	}
 
 	public void CheckForWinner()
 	{
-		GameObject[] players = GameObject.FindGameObjectsWithTag ("Player");
+		UpdatePlayers();
 		int deathCount = 0;
 
 		foreach(GameObject p in players)
