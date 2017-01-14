@@ -63,21 +63,22 @@ public class GameManager : Photon.MonoBehaviour {
 			p.GetComponent<Player>().Respawn();
 	}
 
-	public void CheckForWinner()
+	public bool CheckForWinner()
 	{
 		UpdatePlayers();
 		int deathCount = 0;
-
+        
 		foreach(GameObject p in players)
 			if (p.GetComponent<Player>().dead)
 				deathCount++;
 
-		if (deathCount == players.Length-1)
+		if (deathCount == players.Length)
 		{
 			win.SetActive(true);
 			water.SetActive(false);
+            return true;
 		}
-
+        return false;
 		//Timer, game start
 	}
 }
