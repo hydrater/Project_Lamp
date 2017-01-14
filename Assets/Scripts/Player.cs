@@ -80,7 +80,7 @@ public class Player : Photon.MonoBehaviour
     {
         if (anim.GetCurrentAnimatorStateInfo(0).IsName("player_Idle"))
         {
-            anim.ResetTrigger("attacked");
+            //anim.ResetTrigger("attacked");
             //transform.GetChild(1).gameObject.SetActive(false);
             //anim.ResetTrigger ("attack");
         }
@@ -95,7 +95,7 @@ public class Player : Photon.MonoBehaviour
 
             if (anim.GetCurrentAnimatorStateInfo(0).IsName("player_Dizzy"))
             {
-                transform.GetChild(1).gameObject.SetActive(false);
+                //transform.GetChild(1).gameObject.SetActive(false);
                 return;
             }
 
@@ -274,7 +274,10 @@ public class Player : Photon.MonoBehaviour
     {
         if (photonView.viewID == id)
         {
+            Debug.Log("Set dizzy");
             anim.SetTrigger("attacked");
+
+            // Disable the attack collider if you are hit.
             transform.GetChild(1).gameObject.SetActive(false);
         }
     }
@@ -284,6 +287,7 @@ public class Player : Photon.MonoBehaviour
     {
         if (photonView.viewID == id)
         {
+            // Activate the attack collider
             transform.GetChild(1).gameObject.SetActive(true);
             anim.SetTrigger("attack");
 
@@ -308,7 +312,7 @@ public class Player : Photon.MonoBehaviour
             audioS.clip = splashes[Random.Range(0, 3)];
             audioS.Play();
         }
-        Debug.Log("A");
+        
         // If the player collided with another player which is attacking, knock the player back
         if (photonView.isMine)
         {
