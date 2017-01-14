@@ -85,6 +85,8 @@ public class Player : Photon.MonoBehaviour
             //anim.ResetTrigger ("attack");
             anim.ResetTrigger("attacked");
         }
+        else if (anim.GetCurrentAnimatorStateInfo(0).IsName("player_Attack"))
+            anim.ResetTrigger("attack");
 
         if (photonView.isMine)
         {
@@ -291,6 +293,7 @@ public class Player : Photon.MonoBehaviour
         {
             // Activate the attack collider
             transform.GetChild(1).gameObject.SetActive(true);
+            transform.GetChild(1).gameObject.GetComponent<BoxCollider2D>().enabled = true;
             anim.SetTrigger("attack");
 
             StartCoroutine(waitForOneSecond());
@@ -300,9 +303,9 @@ public class Player : Photon.MonoBehaviour
     IEnumerator waitForOneSecond()
     {
         yield return new WaitForSeconds(1);
-
-        anim.ResetTrigger("attack");
+        
         transform.GetChild(1).gameObject.SetActive(false);
+        transform.GetChild(1).gameObject.GetComponent<BoxCollider2D>().enabled = false;
     }
 
     void OnTriggerStay2D(Collider2D other)
@@ -314,7 +317,7 @@ public class Player : Photon.MonoBehaviour
             audioS.clip = splashes[Random.Range(0, 3)];
             audioS.Play();
         }
-        
+        Debug.Log("A");
         // If the player collided with another player which is attacking, knock the player back
         if (photonView.isMine)
         {
