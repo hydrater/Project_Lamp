@@ -78,11 +78,12 @@ public class Player : Photon.MonoBehaviour
 
     void FixedUpdate()
     {
-        if (anim.GetCurrentAnimatorStateInfo(0).IsName("player_Idle"))
+        if (anim.GetCurrentAnimatorStateInfo(0).IsName("player_Dizzy"))
         {
             //anim.ResetTrigger("attacked");
             //transform.GetChild(1).gameObject.SetActive(false);
             //anim.ResetTrigger ("attack");
+            anim.ResetTrigger("attacked");
         }
 
         if (photonView.isMine)
@@ -96,6 +97,7 @@ public class Player : Photon.MonoBehaviour
             if (anim.GetCurrentAnimatorStateInfo(0).IsName("player_Dizzy"))
             {
                 //transform.GetChild(1).gameObject.SetActive(false);
+                
                 return;
             }
 
