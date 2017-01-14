@@ -299,7 +299,7 @@ public class Player : Photon.MonoBehaviour
         transform.GetChild(1).gameObject.SetActive(false);
     }
 
-    void OnTriggerEnter2D(Collider2D other)
+    void OnTriggerStay2D(Collider2D other)
     {
         if (other.gameObject.tag == "Water")
         {
@@ -308,7 +308,7 @@ public class Player : Photon.MonoBehaviour
             audioS.clip = splashes[Random.Range(0, 3)];
             audioS.Play();
         }
-
+        Debug.Log("A");
         // If the player collided with another player which is attacking, knock the player back
         if (photonView.isMine)
         {
