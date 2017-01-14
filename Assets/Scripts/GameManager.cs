@@ -1,83 +1,89 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class GameManager : Photon.MonoBehaviour {
+public class GameManager : Photon.MonoBehaviour
+{
 
-	const string VERSION = "Prototype";
-	public GameObject loadingScreen, win, lose, water;
-	GameObject[] players;
-	
-	void Awake()
-	{
-		if (!PhotonNetwork.connected)
-			PhotonNetwork.ConnectUsingSettings(VERSION);
-		PhotonNetwork.playerName = PlayerPrefs.GetString("Player Name");
-	}
+    const string VERSION = "Prototype";
+    public GameObject loadingScreen, win, lose, water;
+    public GameObject[] onScreenControls;
+    GameObject[] players;
 
-	void OnJoinedLobby ()
-	{
-		RoomOptions roomOptions = new RoomOptions();
-		roomOptions.MaxPlayers = 20;
-		PhotonNetwork.JoinOrCreateRoom ("Only", roomOptions, TypedLobby.Default);
-	}
+    void Awake()
+    {
+        if (!PhotonNetwork.connected)
+            PhotonNetwork.ConnectUsingSettings(VERSION);
+        PhotonNetwork.playerName = PlayerPrefs.GetString("Player Name");
+    }
 
-	void OnJoinedRoom()
-	{
-		loadingScreen.SetActive(false);
-		UpdatePlayers();
+    void OnJoinedLobby()
+    {
+        RoomOptions roomOptions = new RoomOptions();
+        roomOptions.MaxPlayers = 20;
+        PhotonNetwork.JoinOrCreateRoom("Only", roomOptions, TypedLobby.Default);
+    }
 
-		if (players.Length < 3)
-			PhotonNetwork.Instantiate("Player", Vector3.zero, Quaternion.identity, 0);
-		if (players.Length > 1)
-		{
-			if (!water.GetActive())
-				photonView.RPC ("GameStart", PhotonTargets.All, photonView.viewID);
-			else
-				water.SetActive(true);
-		}
-		//Player spawning with water issue
-	}
+    void OnJoinedRoom()
+    {
+        loadingScreen.SetActive(false);
+        foreach (GameObject b in onScreenControls)
+            b.SetActive(true);
+        UpdatePlayers();
 
-	private void UpdatePlayers()
-	{
-		players = GameObject.FindGameObjectsWithTag ("Player");
-	}
+        if (players.Length < 3)
+            PhotonNetwork.Instantiate("Player", Vector3.zero, Quaternion.identity, 0);
+        if (players.Length > 1)
+        {
+            if (!water.GetActive())
+                photonView.RPC("GameStart", PhotonTargets.All, photonView.viewID);
+            else
+                water.SetActive(true);
+        }
+        //Player spawning with water issue
+    }
 
-	void Start () 
-	{
-	}
-	
-	void Update () {
-	
-	}
+    private void UpdatePlayers()
+    {
+        players = GameObject.FindGameObjectsWithTag("Player");
+    }
 
-	[PunRPC]
-	void GameStart()
-	{
-		//Snap players to start location
-		if (PhotonNetwork.isMasterClient)
-			water.transform.position = new Vector2(0.3f, -74);
-		water.SetActive(true);
-		UpdatePlayers();
-		foreach (GameObject p in players)
-			p.GetComponent<Player>().Respawn();
-	}
+    void Start()
+    {
+    }
 
-	public void CheckForWinner()
-	{
-		UpdatePlayers();
-		int deathCount = 0;
+    void Update()
+    {
 
-		foreach(GameObject p in players)
-			if (p.GetComponent<Player>().dead)
-				deathCount++;
+    }
 
-		if (deathCount == players.Length-1)
-		{
-			win.SetActive(true);
-			water.SetActive(false);
-		}
+    [PunRPC]
+    void GameStart()
+    {
+        //Snap players to start location
+        if (PhotonNetwork.isMasterClient)
+            water.transform.position = new Vector2(0.3f, -74);
+        water.SetActive(true);
+        UpdatePlayers();
+        foreach (GameObject p in players)
+            p.GetComponent<Player>().Respawn();
+    }
 
-		//Timer, game start
-	}
+    public bool CheckForWinner()
+    {
+        UpdatePlayers();
+        int deathCount = 0;
+
+        foreach (GameObject p in players)
+            if (p.GetComponent<Player>().dead)
+                deathCount++;
+
+        if (deathCount == players.Length)
+        {
+            win.SetActive(true);
+            water.SetActive(false);
+            return true;
+        }
+        return false;
+        //Timer, game start
+    }
 }
