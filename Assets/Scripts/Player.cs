@@ -98,8 +98,6 @@ public class Player : Photon.MonoBehaviour
 
             if (anim.GetCurrentAnimatorStateInfo(0).IsName("player_Dizzy"))
             {
-                //transform.GetChild(1).gameObject.SetActive(false);
-                
                 return;
             }
 
@@ -333,7 +331,7 @@ public class Player : Photon.MonoBehaviour
             {
                 Vector2 direction = (transform.position - other.transform.parent.position).normalized;
                 rb2d.AddForce(direction * attackForce);
-                other.gameObject.GetComponent<Player>().SetDizzyLocal();
+                other.gameObject.transform.parent.gameObject.GetComponent<Player>().SetDizzyLocal();
                 photonView.RPC("SetDizzy", PhotonTargets.All, photonView.viewID);
                 Debug.Log("Ouch!");
             }
