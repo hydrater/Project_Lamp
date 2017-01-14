@@ -199,7 +199,7 @@ public class Player : Photon.MonoBehaviour
 
     public void HandleAttack()
     {
-        if (!attack)
+        if (!attack && !anim.GetCurrentAnimatorStateInfo(0).IsName("player_Dizzy"))
         {
             photonView.RPC("SetAttack", PhotonTargets.All, photonView.viewID);
             attack = true;
@@ -286,6 +286,14 @@ public class Player : Photon.MonoBehaviour
         }
     }
 
+    void SetDizzyLocal()
+    {
+        anim.SetTrigger("attacked");
+
+        // Disable the attack collider if you are hit.
+        transform.GetChild(1).gameObject.SetActive(false);
+    }
+
     [PunRPC]
     void SetAttack(int id)
     {
@@ -325,6 +333,7 @@ public class Player : Photon.MonoBehaviour
             {
                 Vector2 direction = (transform.position - other.transform.parent.position).normalized;
                 rb2d.AddForce(direction * attackForce);
+                other.gameObject.GetComponent<Player>().SetDizzyLocal();
                 photonView.RPC("SetDizzy", PhotonTargets.All, photonView.viewID);
                 Debug.Log("Ouch!");
             }
