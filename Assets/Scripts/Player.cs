@@ -200,6 +200,7 @@ public class Player : Photon.MonoBehaviour
         if (!attack && !anim.GetCurrentAnimatorStateInfo(0).IsName("player_Dizzy"))
         {
             photonView.RPC("SetAttack", PhotonTargets.All, photonView.viewID);
+            SetAttackLocal();
             attack = true;
             attackTimer = 1;
         }
@@ -287,9 +288,6 @@ public class Player : Photon.MonoBehaviour
     void SetDizzyLocal()
     {
         anim.SetTrigger("attacked");
-
-        // Disable the attack collider if you are hit.
-        transform.GetChild(1).gameObject.SetActive(false);
     }
 
     [PunRPC]
@@ -304,6 +302,12 @@ public class Player : Photon.MonoBehaviour
 
             StartCoroutine(waitForOneSecond());
         }
+    }
+
+    void SetAttackLocal()
+    {
+        transform.GetChild(1).gameObject.SetActive(true);
+        transform.GetChild(1).gameObject.GetComponent<BoxCollider2D>().enabled = true;
     }
 
     IEnumerator waitForOneSecond()
@@ -323,7 +327,12 @@ public class Player : Photon.MonoBehaviour
             audioS.clip = splashes[Random.Range(0, 3)];
             audioS.Play();
         }
-        Debug.Log("A");
+
+        if (other.gameObject.tag == "Hit")
+        {
+            SetDizzyLocal();
+        }
+
         // If the player collided with another player which is attacking, knock the player back
         if (photonView.isMine)
         {
@@ -331,7 +340,6 @@ public class Player : Photon.MonoBehaviour
             {
                 Vector2 direction = (transform.position - other.transform.parent.position).normalized;
                 rb2d.AddForce(direction * attackForce);
-                other.gameObject.transform.parent.gameObject.GetComponent<Player>().SetDizzyLocal();
                 photonView.RPC("SetDizzy", PhotonTargets.All, photonView.viewID);
                 Debug.Log("Ouch!");
             }
