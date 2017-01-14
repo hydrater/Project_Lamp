@@ -183,9 +183,9 @@ public class Player : Photon.MonoBehaviour
         }
         else
         {
-            //transform.position = Vector3.Lerp(transform.position, realPosition, 0.1f);
+            transform.position = Vector3.Lerp(transform.position, realPosition, 0.1f);
             //transform.position = realPosition;
-            transform.position = Vector3.MoveTowards(transform.position, realPosition, 20.0f * Time.deltaTime);
+            //transform.position = Vector3.MoveTowards(transform.position, realPosition, 20.0f * Time.deltaTime);
             if (dead)
                 if (GetComponent<SpriteRenderer>().enabled)
                     RIP();
