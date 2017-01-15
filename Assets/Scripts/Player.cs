@@ -257,11 +257,16 @@ public class Player : Photon.MonoBehaviour
         transform.GetChild(1).gameObject.SetActive(false);
 
         // If there no winner, go to spectator mode
-        if (!GameObject.FindGameObjectWithTag("Manager").GetComponent<GameManager>().CheckForWinner())
-            StartCoroutine(UpdateSpectatorMode());
-        else
-			GameObject.FindGameObjectWithTag("Manager").GetComponent<GameManager>().NewGame();
-        
+		GameManager temp = GameObject.FindGameObjectWithTag("Manager").GetComponent<GameManager>();
+		if (temp.water.canMove)
+		{
+			if (temp.CheckForWinner())
+				GameObject.FindGameObjectWithTag("Manager").GetComponent<GameManager>().NewGame();
+        	else
+				StartCoroutine(UpdateSpectatorMode());
+		}
+		else
+			Respawn();
     }
 
     public void Respawn()
@@ -274,7 +279,6 @@ public class Player : Photon.MonoBehaviour
 	[PunRPC]
 	void NetWorkRespawn()
 	{
-		Debug.Log(photonView.viewID);
 		transform.position = Vector3.zero;
 		GetComponent<SpriteRenderer>().enabled = true;
         rb2d.isKinematic = false;
