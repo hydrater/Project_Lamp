@@ -65,7 +65,10 @@ public class Player : Photon.MonoBehaviour
         bc2d = GetComponent<BoxCollider2D>();
         anim = GetComponent<Animator>();
         if (!photonView.isMine)
-            GetComponent<Rigidbody2D>().isKinematic = true;
+        {
+			GetComponent<Rigidbody2D>().isKinematic = true;
+        	Destroy(transform.GetChild(0).GetComponent<AudioListener>());
+        }
         //Destroy (GetComponent<Rigidbody2D>());
     }
 

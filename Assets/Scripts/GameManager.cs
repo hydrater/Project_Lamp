@@ -26,22 +26,47 @@ public class GameManager : Photon.MonoBehaviour
 
     void OnJoinedRoom()
     {
-        loadingScreen.SetActive(false);
         foreach (GameObject b in onScreenControls)
             b.SetActive(true);
-        UpdatePlayers();
+		
+        StartCoroutine(FinishedLoading());
+        //Player spawning with water issue
+    }
 
-        if (players.Length < 3)
-            PhotonNetwork.Instantiate("Player", Vector3.zero, Quaternion.identity, 0);
-        if (players.Length > 1)
+	IEnumerator FinishedLoading()
+	{
+//		if (!photonView.isMine)
+//		{
+//			Debug.Log("please fix");
+//		}
+		yield return new WaitForSeconds(0.5f);
+
+		UpdatePlayers();
+
+		Debug.Log("test start" + players.Length);
+
+
+		if (players.Length < 3)
         {
+			Debug.Log(players.Length);
+			PhotonNetwork.Instantiate("Player", Vector3.zero, Quaternion.identity, 0);
+        }
+
+		UpdatePlayers();
+
+		if (players.Length > 1)
+        {
+        	Debug.Log("reached2");
             if (!water.canMove)
-                photonView.RPC("GameStart", PhotonTargets.All, photonView.viewID);
+                photonView.RPC("GameStart", PhotonTargets.All);
             else
                 water.canMove = true;
         }
-        //Player spawning with water issue
-    }
+
+		loadingScreen.SetActive(false);
+		Debug.Log("test success" + players.Length);
+
+	}
 
     private void UpdatePlayers()
     {
@@ -54,7 +79,6 @@ public class GameManager : Photon.MonoBehaviour
 
     void Update()
     {
-
     }
 
     [PunRPC]
