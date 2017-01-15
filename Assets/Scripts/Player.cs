@@ -181,12 +181,12 @@ public class Player : Photon.MonoBehaviour
         }
         else
         {
-            transform.position = Vector3.Lerp(transform.position, realPosition, 0.1f);
+            transform.position = Vector3.Lerp(transform.position, realPosition, 1.5f);
             //transform.position = realPosition;
             //transform.position = Vector3.MoveTowards(transform.position, realPosition, 20.0f * Time.deltaTime);
-            if (dead)
-                if (GetComponent<SpriteRenderer>().enabled)
-                    RIP();
+//            if (dead)
+//                if (GetComponent<SpriteRenderer>().enabled)
+//                    RIP();
         }
     }
 
@@ -246,9 +246,10 @@ public class Player : Photon.MonoBehaviour
         return false;
     }
 
+    [PunRPC]
     void RIP()
     {
-        Debug.Log("DEATH");
+        Debug.Log("DEATH " + photonView.viewID);
         dead = true;
         deadPos = transform.position;
         rb2d.isKinematic = true;
@@ -267,10 +268,18 @@ public class Player : Photon.MonoBehaviour
     {
         if (!dead)
             return;
-        GetComponent<SpriteRenderer>().enabled = true;
+		photonView.RPC("NetWorkRespawn", PhotonTargets.All, photonView.viewID);
+    }
+
+	[PunRPC]
+	void NetWorkRespawn()
+	{
+		Debug.Log(photonView.viewID);
+		transform.position = Vector3.zero;
+		GetComponent<SpriteRenderer>().enabled = true;
         rb2d.isKinematic = false;
         bc2d.enabled = true;
-    }
+	}
 
     [PunRPC]
     void SetDizzy(int id)
@@ -322,7 +331,7 @@ public class Player : Photon.MonoBehaviour
     {
         if (other.gameObject.tag == "Water")
         {
-            RIP();
+			photonView.RPC("RIP", PhotonTargets.All, photonView.viewID);
             AudioSource audioS = GetComponent<AudioSource>();
             audioS.clip = splashes[Random.Range(0, 3)];
             audioS.Play();

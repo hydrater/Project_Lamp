@@ -5,7 +5,8 @@ public class GameManager : Photon.MonoBehaviour
 {
 
     const string VERSION = "Prototype";
-    public GameObject loadingScreen, win, lose, water;
+    public GameObject loadingScreen, win, lose;
+	public Water water;
     public GameObject[] onScreenControls;
     GameObject[] players;
 
@@ -34,10 +35,10 @@ public class GameManager : Photon.MonoBehaviour
             PhotonNetwork.Instantiate("Player", Vector3.zero, Quaternion.identity, 0);
         if (players.Length > 1)
         {
-            if (!water.GetActive())
+            if (!water.canMove)
                 photonView.RPC("GameStart", PhotonTargets.All, photonView.viewID);
             else
-                water.SetActive(true);
+                water.canMove = true;
         }
         //Player spawning with water issue
     }
@@ -62,10 +63,9 @@ public class GameManager : Photon.MonoBehaviour
         //Snap players to start location
         if (PhotonNetwork.isMasterClient)
             water.transform.position = new Vector2(0.3f, -74);
-        water.SetActive(true);
+        water.canMove = true;
         UpdatePlayers();
-        foreach (GameObject p in players)
-            p.GetComponent<Player>().Respawn();
+        GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().Respawn();
     }
 
     public bool CheckForWinner()
@@ -77,13 +77,21 @@ public class GameManager : Photon.MonoBehaviour
             if (p.GetComponent<Player>().dead)
                 deathCount++;
 
-        if (deathCount == players.Length)
+        if (deathCount == players.Length && deathCount > 0)
         {
             win.SetActive(true);
-            water.SetActive(false);
+            water.canMove = false;
             return true;
         }
+        StartCoroutine(NewGame());
         return false;
         //Timer, game start
     }
+
+	IEnumerator NewGame()
+	{
+		yield return new WaitForSeconds(3);
+		win.SetActive(false);
+		GameStart();
+	}
 }

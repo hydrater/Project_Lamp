@@ -5,6 +5,7 @@ public class Water : Photon.MonoBehaviour {
 
 	[SerializeField]
 	float movementSpeed = 0;
+	public bool canMove = false;
 
 	Vector3 realPosition;
 	// Use this for initialization
@@ -13,16 +14,12 @@ public class Water : Photon.MonoBehaviour {
 	{
 		realPosition = transform.position;
 	}
-
-	void Start () {
-	
-	}
 	
 	// Update is called once per frame
 	void Update () 
 	{
 		if(PhotonNetwork.isMasterClient)
-			transform.position += Vector3.up * movementSpeed * Time.deltaTime;
+			if (canMove) transform.position += Vector3.up * movementSpeed * Time.deltaTime;
 		else
 			transform.position = Vector3.Lerp(transform.position, realPosition, 0.1f);
 	}
