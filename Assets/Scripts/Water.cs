@@ -19,7 +19,9 @@ public class Water : Photon.MonoBehaviour {
 	void Update () 
 	{
 		if(PhotonNetwork.isMasterClient)
+		{
 			if (canMove) transform.position += Vector3.up * movementSpeed * Time.deltaTime;
+		}
 		else
 			transform.position = Vector3.Lerp(transform.position, realPosition, 0.1f);
 	}

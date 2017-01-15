@@ -26,6 +26,7 @@ public class GameManager : Photon.MonoBehaviour
 
     void OnJoinedRoom()
     {
+    	Debug.Log("Player has joined!");
         foreach (GameObject b in onScreenControls)
             b.SetActive(true);
 		
@@ -121,5 +122,5 @@ public class GameManager : Photon.MonoBehaviour
 		yield return new WaitForSeconds(3);
 		win.SetActive(false);
 		photonView.RPC("GameStart", PhotonTargets.All);
- 	} 
+ 	}
 }
