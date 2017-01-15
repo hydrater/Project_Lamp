@@ -33,13 +33,18 @@ public class GameManager : Photon.MonoBehaviour
         //Player spawning with water issue
     }
 
+	void OnPhotonPlayerDisconnected(PhotonPlayer other)
+ 	{
+    	//Check whether it is the last player and assign winner if so	
+ 	}
+
 	IEnumerator FinishedLoading()
 	{
 //		if (!photonView.isMine)
 //		{
 //			Debug.Log("please fix");
 //		}
-		yield return new WaitForSeconds(0.5f);
+		yield return null;
 
 		UpdatePlayers();
 

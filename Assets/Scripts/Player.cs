@@ -66,9 +66,9 @@ public class Player : Photon.MonoBehaviour
         anim = GetComponent<Animator>();
         if (!photonView.isMine)
         {
+			transform.GetChild(0).gameObject.SetActive(false);
 			GetComponent<Rigidbody2D>().isKinematic = true;
-        	Destroy(transform.GetChild(0).GetComponent<AudioListener>());
-        }
+		}
         //Destroy (GetComponent<Rigidbody2D>());
     }
 
@@ -76,7 +76,6 @@ public class Player : Photon.MonoBehaviour
     void Start()
     {
         realPosition = transform.position;
-        if (!photonView.isMine) transform.GetChild(0).gameObject.SetActive(false);
     }
 
     void FixedUpdate()
@@ -327,14 +326,6 @@ public class Player : Photon.MonoBehaviour
 
     void OnTriggerStay2D(Collider2D other)
     {
-        if (other.gameObject.tag == "Water")
-        {
-			photonView.RPC("RIP", PhotonTargets.All);
-            AudioSource audioS = GetComponent<AudioSource>();
-            audioS.clip = splashes[Random.Range(0, 3)];
-            audioS.Play();
-        }
-
         if (other.gameObject.tag == "Hit")
         {
             SetDizzyLocal();
@@ -350,6 +341,14 @@ public class Player : Photon.MonoBehaviour
                 photonView.RPC("SetDizzy", PhotonTargets.All, photonView.viewID);
                 Debug.Log("Ouch!");
             }
+
+			if (other.gameObject.tag == "Water")
+        	{
+				photonView.RPC("RIP", PhotonTargets.All);
+	            AudioSource audioS = GetComponent<AudioSource>();
+	            audioS.clip = splashes[Random.Range(0, 3)];
+	            audioS.Play();
+        	}
         }
     }
 
