@@ -9,6 +9,7 @@ public class GameManager : Photon.MonoBehaviour
 	public Water water;
     public GameObject[] onScreenControls;
     GameObject[] players;
+    public Player myPlayer;
 
     void Awake()
     {
@@ -34,10 +35,7 @@ public class GameManager : Photon.MonoBehaviour
         //Player spawning with water issue
     }
 
-	void OnPhotonPlayerDisconnected(PhotonPlayer other)
- 	{
-    	//Check whether it is the last player and assign winner if so	
- 	}
+	
 
 	IEnumerator FinishedLoading()
 	{
@@ -49,9 +47,6 @@ public class GameManager : Photon.MonoBehaviour
 
 		UpdatePlayers();
 
-		Debug.Log("test start" + players.Length);
-
-
 		if (players.Length < 3)
         {
 			Debug.Log(players.Length);
@@ -62,7 +57,6 @@ public class GameManager : Photon.MonoBehaviour
 
 		if (players.Length > 1)
         {
-        	Debug.Log("reached2");
             if (!water.canMove)
                 photonView.RPC("GameStart", PhotonTargets.All);
             else
@@ -70,8 +64,6 @@ public class GameManager : Photon.MonoBehaviour
         }
 
 		loadingScreen.SetActive(false);
-		Debug.Log("test success" + players.Length);
-
 	}
 
     private void UpdatePlayers()
@@ -95,7 +87,7 @@ public class GameManager : Photon.MonoBehaviour
             water.transform.position = new Vector2(0.3f, -74);
         water.canMove = true;
         UpdatePlayers();
-        GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().Respawn();
+        myPlayer.Respawn();
     }
 
     public bool CheckForWinner()
@@ -108,13 +100,13 @@ public class GameManager : Photon.MonoBehaviour
                 deathCount++;
 
         return (deathCount == players.Length && deathCount != 1);
-        //Timer, game start
     }
 
 	public void NewGame()
 	{
 		win.SetActive(true);
         water.canMove = false;
+		StartCoroutine(NewGameTimer());
 	}
 
  	IEnumerator NewGameTimer()

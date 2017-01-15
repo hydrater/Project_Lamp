@@ -58,21 +58,26 @@ public class Player : Photon.MonoBehaviour
     private bool rightButtonDown = false;
     private bool jumpButton = false;
     private bool attackButton = false;
+    private GameManager manager;
 
     void Awake()
     {
+		manager = GameObject.FindGameObjectWithTag("Manager").GetComponent<GameManager>();
         rb2d = GetComponent<Rigidbody2D>();
         bc2d = GetComponent<BoxCollider2D>();
         anim = GetComponent<Animator>();
-        if (!photonView.isMine)
+        if (photonView.isMine)
         {
+			manager.myPlayer = this;
+        	manager.GetComponent<UIManager>().myPlayer = this;
+        }
+		else
+		{
 			transform.GetChild(0).gameObject.SetActive(false);
 			GetComponent<Rigidbody2D>().isKinematic = true;
 		}
-        //Destroy (GetComponent<Rigidbody2D>());
     }
 
-    // Use this for initialization
     void Start()
     {
         realPosition = transform.position;
@@ -99,9 +104,7 @@ public class Player : Photon.MonoBehaviour
             grounded = isGrounded();
 
             if (anim.GetCurrentAnimatorStateInfo(0).IsName("player_Dizzy"))
-            {
                 return;
-            }
 
             // Handles the jump 
 			if ((Input.GetKey(KeyCode.Space) || jumpButton || Input.GetKey(KeyCode.UpArrow)) && grounded && anim.GetCurrentAnimatorStateInfo(0).IsTag("free"))
@@ -257,17 +260,23 @@ public class Player : Photon.MonoBehaviour
         transform.GetChild(1).gameObject.SetActive(false);
 
         // If there no winner, go to spectator mode
-		GameManager temp = GameObject.FindGameObjectWithTag("Manager").GetComponent<GameManager>();
-		if (temp.water.canMove)
+		if (manager.water.canMove)
 		{
-			if (temp.CheckForWinner())
-				GameObject.FindGameObjectWithTag("Manager").GetComponent<GameManager>().NewGame();
+			if (manager.CheckForWinner())
+				manager.NewGame();
         	else
 				StartCoroutine(UpdateSpectatorMode());
 		}
 		else
 			Respawn();
     }
+
+	void OnPhotonPlayerDisconnected(PhotonPlayer other)
+ 	{
+    	//Check whether it is the last player and assign winner if so
+		if (manager.CheckForWinner())
+			manager.NewGame();
+ 	}
 
     public void Respawn()
     {
@@ -408,9 +417,7 @@ public class Player : Photon.MonoBehaviour
             }
 
             if (spectatorMode != SPECTATORMODE.MANUAL)
-            {
                 transform.position = Vector3.Lerp(transform.position, target, Time.deltaTime * 5);
-            }
 
             yield return null;
         }
