@@ -102,7 +102,7 @@ public class Player : Photon.MonoBehaviour
             }
 
             // Handles the jump 
-            if ((Input.GetKey(KeyCode.Space) || jumpButton) && grounded && anim.GetCurrentAnimatorStateInfo(0).IsTag("free"))
+			if ((Input.GetKey(KeyCode.Space) || jumpButton || Input.GetKey(KeyCode.UpArrow)) && grounded && anim.GetCurrentAnimatorStateInfo(0).IsTag("free"))
             {
                 rb2d.AddForce(Vector2.up * jumpForce);
                 anim.SetBool("jump", true);
@@ -184,9 +184,6 @@ public class Player : Photon.MonoBehaviour
             transform.position = Vector3.Lerp(transform.position, realPosition, 1.5f);
             //transform.position = realPosition;
             //transform.position = Vector3.MoveTowards(transform.position, realPosition, 20.0f * Time.deltaTime);
-//            if (dead)
-//                if (GetComponent<SpriteRenderer>().enabled)
-//                    RIP();
         }
     }
 
@@ -199,7 +196,7 @@ public class Player : Photon.MonoBehaviour
     {
         if (!attack && !anim.GetCurrentAnimatorStateInfo(0).IsName("player_Dizzy"))
         {
-            photonView.RPC("SetAttack", PhotonTargets.All, photonView.viewID);
+            photonView.RPC("SetAttack", PhotonTargets.All);
             SetAttackLocal();
             attack = true;
             attackTimer = 1;
@@ -258,17 +255,18 @@ public class Player : Photon.MonoBehaviour
         transform.GetChild(1).gameObject.SetActive(false);
 
         // If there no winner, go to spectator mode
-        if (!GameObject.FindGameObjectsWithTag("Manager")[0].GetComponent<GameManager>().CheckForWinner())
+        if (!GameObject.FindGameObjectWithTag("Manager").GetComponent<GameManager>().CheckForWinner())
             StartCoroutine(UpdateSpectatorMode());
         else
-            Debug.Log("Winner");
+			GameObject.FindGameObjectWithTag("Manager").GetComponent<GameManager>().NewGame();
+        
     }
 
     public void Respawn()
     {
         if (!dead)
             return;
-		photonView.RPC("NetWorkRespawn", PhotonTargets.All, photonView.viewID);
+		photonView.RPC("NetWorkRespawn", PhotonTargets.All);
     }
 
 	[PunRPC]
@@ -300,17 +298,14 @@ public class Player : Photon.MonoBehaviour
     }
 
     [PunRPC]
-    void SetAttack(int id)
+    void SetAttack()
     {
-        if (photonView.viewID == id)
-        {
-            // Activate the attack collider
-            transform.GetChild(1).gameObject.SetActive(true);
-            transform.GetChild(1).gameObject.GetComponent<BoxCollider2D>().enabled = true;
-            anim.SetTrigger("attack");
+    	//On attack collider
+		transform.GetChild(1).gameObject.SetActive(true);
+        transform.GetChild(1).gameObject.GetComponent<BoxCollider2D>().enabled = true;
+        anim.SetTrigger("attack");
 
-            StartCoroutine(waitForOneSecond());
-        }
+        StartCoroutine(waitForOneSecond());
     }
 
     void SetAttackLocal()
@@ -331,7 +326,7 @@ public class Player : Photon.MonoBehaviour
     {
         if (other.gameObject.tag == "Water")
         {
-			photonView.RPC("RIP", PhotonTargets.All, photonView.viewID);
+			photonView.RPC("RIP", PhotonTargets.All);
             AudioSource audioS = GetComponent<AudioSource>();
             audioS.clip = splashes[Random.Range(0, 3)];
             audioS.Play();

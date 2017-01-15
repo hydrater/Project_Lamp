@@ -77,21 +77,20 @@ public class GameManager : Photon.MonoBehaviour
             if (p.GetComponent<Player>().dead)
                 deathCount++;
 
-        if (deathCount == players.Length && deathCount > 0)
-        {
-            win.SetActive(true);
-            water.canMove = false;
-            return true;
-        }
-        StartCoroutine(NewGame());
-        return false;
+        return (deathCount == players.Length && deathCount != 1);
         //Timer, game start
     }
 
-	IEnumerator NewGame()
+	public void NewGame()
 	{
+		win.SetActive(true);
+        water.canMove = false;
+	}
+
+ 	IEnumerator NewGameTimer()
+ 	{
 		yield return new WaitForSeconds(3);
 		win.SetActive(false);
-		GameStart();
-	}
+		photonView.RPC("GameStart", PhotonTargets.All);
+ 	} 
 }
