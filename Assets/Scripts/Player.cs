@@ -60,6 +60,8 @@ public class Player : Photon.MonoBehaviour
     private bool attackButton = false;
     private GameManager manager;
 
+    private bool inSpectatorMode = false;
+
     void Awake()
     {
 		manager = GameObject.FindGameObjectWithTag("Manager").GetComponent<GameManager>();
@@ -384,7 +386,9 @@ public class Player : Photon.MonoBehaviour
         target = deadPos;
         spectatorMode = SPECTATORMODE.TARGET;
 
-        while (true)
+        inSpectatorMode = true;
+
+        while (inSpectatorMode)
         {
             if (Input.GetKeyDown(KeyCode.Tab))
             {
@@ -421,6 +425,11 @@ public class Player : Photon.MonoBehaviour
 
             yield return null;
         }
+    }
+
+    public void ExitSpectatorMode()
+    {
+        inSpectatorMode = false;
     }
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
