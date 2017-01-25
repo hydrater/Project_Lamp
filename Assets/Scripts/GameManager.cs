@@ -49,7 +49,6 @@ public class GameManager : Photon.MonoBehaviour
 
 		if (players.Length < 3)
         {
-			Debug.Log(players.Length);
 			PhotonNetwork.Instantiate("Player", Vector3.zero, Quaternion.identity, 0);
         }
 
@@ -83,8 +82,7 @@ public class GameManager : Photon.MonoBehaviour
     void GameStart()
     {
         //Snap players to start location
-        if (PhotonNetwork.isMasterClient)
-            water.transform.position = new Vector2(0.3f, -74);
+        water.transform.position = new Vector2(0.3f, -74);
         water.canMove = true;
         UpdatePlayers();
         myPlayer.Respawn();
@@ -99,7 +97,7 @@ public class GameManager : Photon.MonoBehaviour
             if (p.GetComponent<Player>().dead)
                 deathCount++;
 
-        return (deathCount == players.Length && deathCount != 1);
+        return (deathCount >= players.Length -1);
     }
 
 	public void NewGame()

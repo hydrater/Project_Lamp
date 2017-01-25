@@ -253,7 +253,6 @@ public class Player : Photon.MonoBehaviour
     [PunRPC]
     void RIP()
     {
-        Debug.Log("DEATH " + photonView.viewID);
         dead = true;
         deadPos = transform.position;
         rb2d.isKinematic = true;
